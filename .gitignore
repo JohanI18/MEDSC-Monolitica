@@ -1,3 +1,4 @@
-_pycache_
+app/_pycache_
 app/.venv
 mysql_data
+app/__pycache__/models.cpython-313.pyc

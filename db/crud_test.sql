@@ -18,14 +18,17 @@ INSERT INTO doctor (identifierCode, firstName, middleName, lastName1, lastName2,
 ('DOC001', 'Carlos', 'Alberto', 'Sanchez', 'Perez', '123456789', 'Av. Siempre Viva 123, Ciudad Capital', 'Masculino', 'Masculino', 'Cardiología', 'carlos.sanchez@example.com', 'admin_script', 'admin_script'),
 ('DOC002', 'Ana', 'Lucia', 'Gomez', 'Lopez', '987654321', 'Calle Falsa 456, Pueblo Nuevo', 'Femenino', 'Femenino', 'Pediatría', 'ana.gomez@example.com', 'admin_script', 'admin_script');
 
+-- Obtener IDs de los doctores insertados
+SET @doctor1_id = (SELECT id FROM doctor WHERE identifierCode = 'DOC001');
+SET @doctor2_id = (SELECT id FROM doctor WHERE identifierCode = 'DOC002');
+
 -- --------------------------------------------------------
--- Insertar Credenciales para Doctores (Ejemplo)
+-- Insertar Credenciales para Doctores
 -- ¡EN PRODUCCIÓN, USA HASHES PARA LAS CONTRASEÑAS!
 -- --------------------------------------------------------
--- Suponiendo que el constraint credentials_ibfk_1 está activo y relaciona con doctor.identifierCode
-INSERT INTO credentials (identifierCode, password, created_by, updated_by) VALUES
-('DOC001', 'password123', 'admin_script', 'admin_script'), -- Contraseña para Dr. Sanchez
-('DOC002', 'securepass', 'admin_script', 'admin_script'); -- Contraseña para Dra. Gomez
+INSERT INTO credentials (identifierCode, password, idUser, userType, created_by, updated_by) VALUES
+('DOC001', 'password123', @doctor1_id, 'doctor', 'admin_script', 'admin_script'), -- Contraseña para Dr. Sanchez
+('DOC002', 'securepass', @doctor2_id, 'doctor', 'admin_script', 'admin_script'); -- Contraseña para Dra. Gomez
 
 -- --------------------------------------------------------
 -- Insertar Pacientes
@@ -34,50 +37,46 @@ INSERT INTO patients (identifierType, identifierCode, firstName, middleName, las
 ('Cedula', '1234567890', 'Juan', 'Carlos', 'Perez', 'Gomez', 'Ecuatoriana', 'Calle Sol 123, Quito', '0991234567', '1985-06-15', 'Masculino', 'Masculino', 'Casado/a', 'Ingeniero de Sistemas', 'O+', 'juan.perez@example.com', 'admin_script', 'admin_script'),
 ('Pasaporte', 'AB123456', 'Maria', 'Elena', 'Lopez', 'Vega', 'Colombiana', 'Av. Luna 456, Guayaquil', '0987654321', '1992-11-20', 'Femenino', 'Femenino', 'Soltero/a', 'Diseñadora Gráfica', 'A+', 'maria.lopez@example.com', 'admin_script', 'admin_script');
 
--- Asignar IDs de pacientes y doctores a variables para facilitar su uso (opcional, útil si se ejecuta en un entorno que lo permita)
--- SET @patient1_id = LAST_INSERT_ID(); -- Si se insertó el segundo paciente
--- SET @patient1_id = (SELECT id FROM patients WHERE identifierCode = '1234567890');
--- SET @patient2_id = (SELECT id FROM patients WHERE identifierCode = 'AB123456');
--- SET @doctor1_id = (SELECT id FROM doctor WHERE identifierCode = 'DOC001');
--- SET @doctor2_id = (SELECT id FROM doctor WHERE identifierCode = 'DOC002');
--- Para este script, asumiremos que los IDs son 1 y 2 respectivamente para simplificar.
+-- Obtener IDs de los pacientes insertados
+SET @patient1_id = (SELECT id FROM patients WHERE identifierCode = '1234567890');
+SET @patient2_id = (SELECT id FROM patients WHERE identifierCode = 'AB123456');
 
 -- --------------------------------------------------------
--- Insertar Alergias para Paciente 1 (Juan Perez, id=1)
+-- Insertar Alergias para Paciente 1 (@patient1_id)
 -- --------------------------------------------------------
-INSERT INTO allergies (allergies, idClinicHistory, created_by, updated_by) VALUES
-('Polen, Penicilina', 1, 'admin_script', 'admin_script');
+INSERT INTO allergies (allergies, idPatient, created_by, updated_by) VALUES
+('Polen, Penicilina', @patient1_id, 'admin_script', 'admin_script');
 
 -- --------------------------------------------------------
--- Insertar Contacto de Emergencia para Paciente 1 (Juan Perez, id=1)
+-- Insertar Contacto de Emergencia para Paciente 1 (@patient1_id)
 -- --------------------------------------------------------
-INSERT INTO emergencyContact (firstName, lastName, address, relationship, phoneNumber1, phoneNumber2, idClinicHistory, created_by, updated_by) VALUES
-('Luisa', 'Gomez', 'Calle Sol 123, Quito (misma que paciente)', 'Esposa', '0997654321', '022345678', 1, 'admin_script', 'admin_script');
+INSERT INTO emergencyContact (firstName, lastName, address, relationship, phoneNumber1, phoneNumber2, idPatient, created_by, updated_by) VALUES
+('Luisa', 'Gomez', 'Calle Sol 123, Quito (misma que paciente)', 'Esposa', '0997654321', '022345678', @patient1_id, 'admin_script', 'admin_script');
 
 -- --------------------------------------------------------
--- Insertar Antecedentes Familiares para Paciente 1 (Juan Perez, id=1)
+-- Insertar Antecedentes Familiares para Paciente 1 (@patient1_id)
 -- --------------------------------------------------------
-INSERT INTO familyBackground (familyBackground, time, degreeRelationship, idClinicHistory, created_by, updated_by) VALUES
-('Padre con Hipertensión, Madre con Diabetes tipo 2', '2000-01-01', '1', 1, 'admin_script', 'admin_script');
+INSERT INTO familyBackground (familyBackground, time, degreeRelationship, idPatient, created_by, updated_by) VALUES
+('Padre con Hipertensión, Madre con Diabetes tipo 2', '2000-01-01', '1', @patient1_id, 'admin_script', 'admin_script');
 
 -- --------------------------------------------------------
--- Insertar Condiciones Preexistentes para Paciente 1 (Juan Perez, id=1)
+-- Insertar Condiciones Preexistentes para Paciente 1 (@patient1_id)
 -- --------------------------------------------------------
-INSERT INTO preExistingCondition (diseaseName, time, medicament, treatment, idClinicHistory, created_by, updated_by) VALUES
-('Asma leve intermitente', '2010-05-01', 'Salbutamol inhalador', 'Uso según necesidad', 1, 'admin_script', 'admin_script');
+INSERT INTO preExistingCondition (diseaseName, time, medicament, treatment, idPatient, created_by, updated_by) VALUES
+('Asma leve intermitente', '2010-05-01', 'Salbutamol inhalador', 'Uso según necesidad', @patient1_id, 'admin_script', 'admin_script');
 
 -- --------------------------------------------------------
--- Insertar Atención Médica para Paciente 1 (Juan Perez, id=1) con Doctor 1 (Carlos Sanchez, id=1)
+-- Insertar Atención Médica para Paciente 1 (@patient1_id) con Doctor 1 (@doctor1_id)
 -- --------------------------------------------------------
-INSERT INTO attention (date, weight, height, temperature, bloodPressure, heartRate, oxygenSaturation, breathingFrequency, glucose, hemoglobin, reasonConsultation, currentIllness, evolution, idClinicHistory, idDoctor, created_by, updated_by) VALUES
-(NOW(), 75, 170, 37, 120, 80, 98, 16, 90, 15, 'Chequeo general anual', 'Paciente asintomático, refiere buen estado general.', 'Estable, sin hallazgos patológicos.', 1, 1, 'admin_script', 'admin_script');
+INSERT INTO attention (date, weight, height, temperature, bloodPressure, heartRate, oxygenSaturation, breathingFrequency, glucose, hemoglobin, reasonConsultation, currentIllness, evolution, idPatient, idDoctor, created_by, updated_by) VALUES
+(NOW(), 75, 170, 37, '120/80', 80, 98, 16, 90, 15, 'Chequeo general anual', 'Paciente asintomático, refiere buen estado general.', 'Estable, sin hallazgos patológicos.', @patient1_id, @doctor1_id, 'admin_script', 'admin_script');
 SET @attention1_id = LAST_INSERT_ID();
 
 -- --------------------------------------------------------
--- Insertar Atención Médica para Paciente 2 (Maria Lopez, id=2) con Doctor 2 (Ana Gomez, id=2)
+-- Insertar Atención Médica para Paciente 2 (@patient2_id) con Doctor 2 (@doctor2_id)
 -- --------------------------------------------------------
-INSERT INTO attention (date, weight, height, temperature, bloodPressure, heartRate, oxygenSaturation, breathingFrequency, reasonConsultation, currentIllness, evolution, idClinicHistory, idDoctor, created_by, updated_by) VALUES
-(NOW() - INTERVAL 1 DAY, 65, 165, 38, 130, 85, 97, 18, 'Dolor de cabeza y malestar general', 'Paciente refiere cefalea intensa desde hace 2 días, acompañada de fatiga.', 'En evaluación.', 2, 2, 'admin_script', 'admin_script');
+INSERT INTO attention (date, weight, height, temperature, bloodPressure, heartRate, oxygenSaturation, breathingFrequency, reasonConsultation, currentIllness, evolution, idPatient, idDoctor, created_by, updated_by) VALUES
+(NOW() - INTERVAL 1 DAY, 65, 165, 38, '130/85', 85, 97, 18, 'Dolor de cabeza y malestar general', 'Paciente refiere cefalea intensa desde hace 2 días, acompañada de fatiga.', 'En evaluación.', @patient2_id, @doctor2_id, 'admin_script', 'admin_script');
 SET @attention2_id = LAST_INSERT_ID();
 
 -- --------------------------------------------------------
@@ -132,8 +131,8 @@ INSERT INTO imaging (typeImaging, imaging, idAttention, created_by, updated_by) 
 -- Leer todos los pacientes no borrados
 SELECT * FROM patients WHERE is_deleted = FALSE;
 
--- Leer un paciente específico por ID (suponiendo id=1)
-SELECT * FROM patients WHERE id = 1 AND is_deleted = FALSE;
+-- Leer un paciente específico por ID (@patient1_id)
+SELECT * FROM patients WHERE id = @patient1_id AND is_deleted = FALSE;
 
 -- Leer todos los doctores no borrados
 SELECT * FROM doctor WHERE is_deleted = FALSE;
@@ -141,7 +140,7 @@ SELECT * FROM doctor WHERE is_deleted = FALSE;
 -- Leer un doctor específico por identifierCode
 SELECT * FROM doctor WHERE identifierCode = 'DOC001' AND is_deleted = FALSE;
 
--- Leer todas las atenciones de un paciente específico (suponiendo patient_id=1) con información del doctor
+-- Leer todas las atenciones de un paciente específico (@patient1_id) con información del doctor
 SELECT
     a.id AS attention_id,
     a.date,
@@ -152,12 +151,12 @@ SELECT
     d.lastName1 AS doctor_lastName1,
     d.speciality
 FROM attention a
-JOIN patients p ON a.idClinicHistory = p.id
+JOIN patients p ON a.idPatient = p.id -- CAMBIADO
 JOIN doctor d ON a.idDoctor = d.id
-WHERE a.idClinicHistory = 1 AND a.is_deleted = FALSE AND p.is_deleted = FALSE AND d.is_deleted = FALSE
+WHERE a.idPatient = @patient1_id AND a.is_deleted = FALSE AND p.is_deleted = FALSE AND d.is_deleted = FALSE -- CAMBIADO
 ORDER BY a.date DESC;
 
--- Leer los diagnósticos y tratamientos de una atención específica (suponiendo attention_id=@attention2_id)
+-- Leer los diagnósticos y tratamientos de una atención específica (@attention2_id)
 SELECT
     diag.cie10Code,
     diag.disease AS diagnostic_disease,
@@ -171,29 +170,29 @@ LEFT JOIN diagnostic diag ON a.id = diag.idAttention AND diag.is_deleted = FALSE
 LEFT JOIN treatment t ON a.id = t.idAttention AND t.is_deleted = FALSE
 WHERE a.id = @attention2_id AND a.is_deleted = FALSE;
 
--- Leer alergias de un paciente (suponiendo patient_id=1)
-SELECT * FROM allergies WHERE idClinicHistory = 1 AND is_deleted = FALSE;
+-- Leer alergias de un paciente (@patient1_id)
+SELECT * FROM allergies WHERE idPatient = @patient1_id AND is_deleted = FALSE; -- CAMBIADO
 
 
 -- ####################################################################
 -- # UPDATE Operaciones                                               #
 -- ####################################################################
 
--- Actualizar número de teléfono de un paciente (suponiendo patient_id=1)
+-- Actualizar número de teléfono y nombre medio de un paciente (@patient1_id)
 UPDATE patients
 SET phoneNumber = '0998887777', updated_by = 'admin_script_update', middleName = 'Andres'
-WHERE id = 1;
+WHERE id = @patient1_id;
 -- Verificar la actualización
-SELECT id, firstName, middleName, lastName1, phoneNumber, updated_at, updated_by FROM patients WHERE id = 1;
+SELECT id, firstName, middleName, lastName1, phoneNumber, updated_at, updated_by FROM patients WHERE id = @patient1_id;
 
--- Actualizar especialidad de un doctor (suponiendo doctor_id=2)
+-- Actualizar especialidad de un doctor (@doctor2_id)
 UPDATE doctor
 SET speciality = 'Pediatría y Neonatología', updated_by = 'admin_script_update'
-WHERE id = 2;
+WHERE id = @doctor2_id;
 -- Verificar la actualización
-SELECT id, firstName, lastName1, speciality, updated_at, updated_by FROM doctor WHERE id = 2;
+SELECT id, firstName, lastName1, speciality, updated_at, updated_by FROM doctor WHERE id = @doctor2_id;
 
--- Actualizar la evolución de una atención (suponiendo attention_id=@attention2_id)
+-- Actualizar la evolución de una atención (@attention2_id)
 UPDATE attention
 SET evolution = 'Paciente refiere mejoría de cefalea con ibuprofeno. Se indica continuar tratamiento y control si no hay mejoría completa.',
     updated_by = 'admin_script_update'
@@ -204,34 +203,35 @@ SELECT id, evolution, updated_at, updated_by FROM attention WHERE id = @attentio
 -- ####################################################################
 -- # DELETE (Soft Delete) Operaciones                                 #
 -- ####################################################################
--- "Borrar" (marcar como borrado) un paciente (suponiendo patient_id=2, Maria Lopez)
--- Nota: Esto no borrará las atenciones asociadas, solo marca al paciente.
--- Deberías tener una lógica en tu aplicación para manejar cómo se muestran/acceden estos datos.
+-- "Borrar" (marcar como borrado) un paciente (@patient2_id, Maria Lopez)
 UPDATE patients
 SET is_deleted = TRUE, updated_by = 'admin_script_delete'
-WHERE id = 2;
+WHERE id = @patient2_id;
 
 -- Verificar que el paciente está marcado como borrado
-SELECT * FROM patients WHERE id = 2;
+SELECT * FROM patients WHERE id = @patient2_id;
 SELECT * FROM patients WHERE is_deleted = FALSE; -- Ya no debería aparecer aquí
 
--- "Borrar" (marcar como borrada) una alergia específica (suponiendo que la alergia con id=1 pertenece al paciente 1)
+-- "Borrar" (marcar como borrada) una alergia específica (suponiendo que la alergia con id=1 pertenece al paciente @patient1_id)
+-- Primero obtenemos el ID de la alergia para ser más precisos, si no lo conocemos de antemano
+SET @allergy_id_to_delete = (SELECT id FROM allergies WHERE idPatient = @patient1_id AND allergies LIKE '%Penicilina%' LIMIT 1);
+
 UPDATE allergies
 SET is_deleted = TRUE, updated_by = 'admin_script_delete'
-WHERE id = 1 AND idClinicHistory = 1; -- Ser específico es bueno
+WHERE id = @allergy_id_to_delete AND idPatient = @patient1_id; -- CAMBIADO y usando variable
 
 -- Verificar que la alergia está marcada como borrada
-SELECT * FROM allergies WHERE id = 1;
-SELECT * FROM allergies WHERE idClinicHistory = 1 AND is_deleted = FALSE; -- Ya no debería aparecer aquí
+SELECT * FROM allergies WHERE id = @allergy_id_to_delete;
+SELECT * FROM allergies WHERE idPatient = @patient1_id AND is_deleted = FALSE; -- Ya no debería aparecer aquí
 
--- "Borrar" (marcar como borrada) una atención específica (suponiendo attention_id=@attention1_id)
+-- "Borrar" (marcar como borrada) una atención específica (@attention1_id)
 UPDATE attention
 SET is_deleted = TRUE, updated_by = 'admin_script_delete'
 WHERE id = @attention1_id;
 
 -- Verificar que la atención está marcada como borrada
 SELECT * FROM attention WHERE id = @attention1_id;
-SELECT * FROM attention WHERE idClinicHistory = 1 AND is_deleted = FALSE; -- Debería mostrar menos atenciones para el paciente 1
+SELECT * FROM attention WHERE idPatient = @patient1_id AND is_deleted = FALSE; -- CAMBIADO
 
 
 -- Reactivar temporalmente las verificaciones de claves foráneas si se desactivaron
