@@ -39,34 +39,6 @@ MEDSC es una aplicación web monolítica que permite:
 
 ## 📦 Tecnologías
 
-- **Backend**:  
-  - Node.js + Express  
-  - Sequelize (ORM para PostgreSQL)  
-  - Socket.IO
-
-- **Frontend** (renderizado en servidor):  
-  - EJS  
-  - Bootstrap 5 (CSS)
-
-- **Base de datos**:  
-  - PostgreSQL
-
-- **Entorno**:  
-  - `.env` para variables de configuración
+Flask(Python) + Jinja2 + SQLAlchemy + Flask-SocketIO
 
 ---
-
-## ⚙️ Requisitos
-
-- Node.js v14+  
-- PostgreSQL 12+  
-- Git
-
----
-
-## 🔧 Instalación
-
-1. Clonar el repositorio  
-   ```bash
-   git clone https://tu-repo.git
-   cd medsc
