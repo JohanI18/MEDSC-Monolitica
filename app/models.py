@@ -92,11 +92,11 @@ class Patient(Base):
                         nullable=True
                       )
     email           = Column(Text(collation="utf8mb4_general_ci"), nullable=True) # Considerar String(255) si tiene un límite
-    created_at      = Column(DateTime, server_default=func.now())
-    created_by      = Column(String(255), nullable=True)
-    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by      = Column(String(255), nullable=True)
-    is_deleted      = Column(Boolean, default=False, index=True) # Añadido index
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     # Relaciones
     attentions = sa_relationship("Attention", back_populates="patient") # Ajustar cascade según la política de BD
@@ -130,11 +130,11 @@ class Doctor(Base):
     )
     speciality     = Column(String(255), nullable=False)
     email          = Column(String(255), nullable=False, unique=True) # unique=True es bueno aquí
-    created_at     = Column(DateTime, server_default=func.now())
-    created_by     = Column(String(255), nullable=True)
-    updated_at     = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by     = Column(String(255), nullable=True)
-    is_deleted     = Column(Boolean, default=False, index=True) # Añadido index
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     # Relaciones
     attentions = sa_relationship("Attention", back_populates="doctor")
@@ -167,11 +167,11 @@ class Attention(Base):
     idPatient = Column(Integer, ForeignKey('patients.id'), nullable=False, index=True)
     idDoctor = Column(Integer, ForeignKey('doctor.id'), nullable=False, index=True)
 
-    created_at = Column(DateTime, server_default=func.now())
-    created_by = Column(String(255), nullable=True)
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by = Column(String(255), nullable=True)
-    is_deleted = Column(Boolean, default=False, index=True) # Añadido index
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     # Relaciones
     patient = sa_relationship("Patient", back_populates="attentions")
@@ -200,11 +200,11 @@ class Allergy(Base):
     # CAMBIADO: idClinicHistory -> idPatient
     idPatient        = Column(Integer, ForeignKey('patients.id'), nullable=False, index=True)
 
-    created_at       = Column(DateTime, server_default=func.now())
-    created_by       = Column(String(255), nullable=True)
-    updated_at       = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by       = Column(String(255), nullable=True)
-    is_deleted       = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     # Relación
     patient = sa_relationship("Patient", back_populates="allergies")
@@ -224,11 +224,11 @@ class Credentials(Base):
     idUser           = Column(Integer, nullable=False, index=True) # Referencia a Patient.id o Doctor.id
     userType         = Column(SA_Enum('doctor', 'patient', name='credentials_userType_enum', native_enum=False, validate_strings=True), nullable=False)
 
-    created_at       = Column(DateTime, server_default=func.now())
-    created_by       = Column(String(255), nullable=True)
-    updated_at       = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by       = Column(String(255), nullable=True)
-    is_deleted       = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     # Relaciones polimórficas (una forma de implementarlas)
     # Se necesita una lógica adicional en la aplicación para determinar a qué tabla apunta idUser
@@ -255,11 +255,11 @@ class Diagnostic(Base):
     chronology             = Column(String(255, collation="utf8mb4_general_ci"), nullable=False)
     idAttention            = Column(Integer, ForeignKey('attention.id'), nullable=False, index=True)
 
-    created_at             = Column(DateTime, server_default=func.now())
-    created_by             = Column(String(255), nullable=True)
-    updated_at             = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by             = Column(String(255), nullable=True)
-    is_deleted             = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     attention = sa_relationship("Attention", back_populates="diagnostics")
 
@@ -280,11 +280,11 @@ class EmergencyContact(Base):
     # CAMBIADO: idClinicHistory -> idPatient
     idPatient        = Column(Integer, ForeignKey('patients.id'), nullable=False, index=True)
 
-    created_at       = Column(DateTime, server_default=func.now())
-    created_by       = Column(String(255), nullable=True)
-    updated_at       = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by       = Column(String(255), nullable=True)
-    is_deleted       = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     patient = sa_relationship("Patient", back_populates="emergency_contacts")
 
@@ -302,11 +302,11 @@ class FamilyBackground(Base):
     # CAMBIADO: idClinicHistory -> idPatient
     idPatient            = Column(Integer, ForeignKey('patients.id'), nullable=False, index=True)
 
-    created_at           = Column(DateTime, server_default=func.now())
-    created_by           = Column(String(255), nullable=True)
-    updated_at           = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by           = Column(String(255), nullable=True)
-    is_deleted           = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     patient = sa_relationship("Patient", back_populates="family_backgrounds")
 
@@ -321,11 +321,11 @@ class Histopathology(Base):
     histopathology    = Column(Text(collation="utf8mb4_general_ci"), nullable=False)
     idAttention       = Column(Integer, ForeignKey('attention.id'), nullable=False, index=True)
 
-    created_at        = Column(DateTime, server_default=func.now())
-    created_by        = Column(String(255), nullable=True)
-    updated_at        = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by        = Column(String(255), nullable=True)
-    is_deleted        = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     attention = sa_relationship("Attention", back_populates="histopathologies")
 
@@ -341,11 +341,11 @@ class Imaging(Base):
     imaging        = Column(Text(collation="utf8mb4_general_ci"), nullable=False)
     idAttention    = Column(Integer, ForeignKey('attention.id'), nullable=False, index=True)
 
-    created_at     = Column(DateTime, server_default=func.now())
-    created_by     = Column(String(255), nullable=True)
-    updated_at     = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by     = Column(String(255), nullable=True)
-    is_deleted     = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     attention = sa_relationship("Attention", back_populates="imagings")
 
@@ -361,11 +361,11 @@ class Laboratory(Base):
     exam          = Column(Text(collation="utf8mb4_general_ci"), nullable=False)
     idAttention   = Column(Integer, ForeignKey('attention.id'), nullable=False, index=True)
 
-    created_at    = Column(DateTime, server_default=func.now())
-    created_by    = Column(String(255), nullable=True)
-    updated_at    = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by    = Column(String(255), nullable=True)
-    is_deleted    = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     attention = sa_relationship("Attention", back_populates="laboratories")
 
@@ -384,11 +384,11 @@ class PreExistingCondition(Base):
     # CAMBIADO: idClinicHistory -> idPatient
     idPatient        = Column(Integer, ForeignKey('patients.id'), nullable=False, index=True)
 
-    created_at       = Column(DateTime, server_default=func.now())
-    created_by       = Column(String(255), nullable=True)
-    updated_at       = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by       = Column(String(255), nullable=True)
-    is_deleted       = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     patient = sa_relationship("Patient", back_populates="pre_existing_conditions")
 
@@ -404,11 +404,11 @@ class RegionalPhysicalExamination(Base):
     examination      = Column(Text(collation="utf8mb4_general_ci"), nullable=False)
     idAttention      = Column(Integer, ForeignKey('attention.id'), nullable=False, index=True)
 
-    created_at       = Column(DateTime, server_default=func.now())
-    created_by       = Column(String(255), nullable=True)
-    updated_at       = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by       = Column(String(255), nullable=True)
-    is_deleted       = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     attention = sa_relationship("Attention", back_populates="regional_physical_examinations")
 
@@ -424,11 +424,11 @@ class ReviewOrgansSystem(Base): # Nombre de clase singular
     review        = Column(Text(collation="utf8mb4_general_ci"), nullable=False)
     idAttention   = Column(Integer, ForeignKey('attention.id'), nullable=False, index=True)
 
-    created_at    = Column(DateTime, server_default=func.now())
-    created_by    = Column(String(255), nullable=True)
-    updated_at    = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by    = Column(String(255), nullable=True)
-    is_deleted    = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     attention = sa_relationship("Attention", back_populates="review_organs_systems")
 
@@ -449,11 +449,11 @@ class Treatment(Base):
     warning      = Column(Text(collation="utf8mb4_general_ci"), nullable=True) # Confirmado nullable=True
     idAttention  = Column(Integer, ForeignKey('attention.id'), nullable=False, index=True)
 
-    created_at   = Column(DateTime, server_default=func.now())
-    created_by   = Column(String(255), nullable=True)
-    updated_at   = Column(DateTime, server_default=func.now(), onupdate=func.now())
-    updated_by   = Column(String(255), nullable=True)
-    is_deleted   = Column(Boolean, default=False, index=True)
+    created_at      = Column(DateTime, server_default=func.now(), nullable=False)
+    created_by      = Column(String(255), nullable=False)
+    updated_at      = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_by      = Column(String(255), nullable=False)
+    is_deleted      = Column(Boolean, default=False, index=True, nullable=False) # Añadido index
 
     attention = sa_relationship("Attention", back_populates="treatments")
 
