@@ -7,7 +7,7 @@ import time
 
 # Carga las variables de entorno desde el archivo .env
 load_dotenv()
-
+ 
 # ----------------------------------------------------------------------
 # Importa tu Base y todos los modelos desde models.py
 # Al importar Base desde models.py, todos los modelos definidos en 
@@ -18,7 +18,7 @@ from models import Base  # <--- THIS IS THE CRUCIAL CHANGE/CORRECTION
 # Obtiene las variables de entorno
 MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_HOST = os.getenv("MYSQL_HOST") # For script on host, should be 'localhost' or '127.0.0.1'
+MYSQL_HOST = os.getenv("MYSQL_HOST") # For script on host, should be 'localhost' or '127.0.0.1'.
 MYSQL_PORT = os.getenv("MYSQL_PORT")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 
@@ -99,6 +99,6 @@ def create_database_tables():
 
 if __name__ == "__main__":
     # Asegúrate de que models.py está en el mismo directorio que create_db.py
-    # o que está en el PYTHONPATH para que la importación "from models import Base" funcione.
+    # o que está en el PYTHONPATH para que la importación "from models import Base" funcione
     print("Iniciando script para crear tablas de la base de datos...")
     create_database_tables()
