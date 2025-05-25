@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class="login-container">
+    <div class="login-box">
+        <h2 class="login-title">INICIO</h2>
+
+        {% include 'partials/_message.html' %}
+
+        <!-- Contenedor para alinear etiquetas e inputs -->
+         <form action="/login" method="POST">
+            <div class="input-group">
+            <label for="cedula">Ingresa tu número de cédula:</label>
+            <input type="text" name="cedula" placeholder="123456789" class="login-input" required>
+            </div>
+
+            <div class="input-group">
+            <label for="password">Ingresa tu contraseña:</label>
+            <input type="text" name="password" placeholder="password" class="login-input" required>
+            </div>
+
+            <button class="login-button">INGRESAR</button>
+         </form>
+         
+    </div>
+</div>
+
+{% endblock %}

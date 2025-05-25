@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tabs.css') }}">
+
+<div class="tabs-container">
+    <div class="tabs-header">
+      <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}", method="POST">
+        {% if sec_view=="addPatient" %}
+          <button class="tab-button active">Datos del Paciente</button>
+        {% else %}
+          <button class="tab-button">Datos del Paciente</button>
+        {% endif %}
+        <!-- <button class="tab-button active { % endif % }">Datos del Paciente</button> -->
+      </form>
+
+      <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatientInfo') }}", method="POST">
+        <button class="tab-button { % if sec_view=='addPatientInfo' % } active print('dentro') { % endif % }">Información adicional</button>
+      </form>
+
+        <!-- <a class="tab-button" href="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}">Datos del Paciente</a> -->
+        <!-- <a class="tab-button" href="">Información adicional</a>      -->
+    </div>
+
+    <div class="tabs-content">
+      {% if sec_view == "addPatient" %}
+        {% include 'partials/_patientForm.html' %}
+      {% elif sec_view == "addPatientInfo" %}
+        <div>
+          {% include 'partials/_emergencyContactForm.html' %}
+          {% include 'partials/_allergiesForm.html' %}
+          {% include 'partials/_familyBackgroundForm.html' %}
+          {% include 'partials/_preExistingConditionForm.html' %}
+        </div>
+      {% endif %}
+    </div>  
+
+</div>
+
+<div class="tabs-content">
+
+</div>

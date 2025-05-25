@@ -1,0 +1,116 @@
+/* ---- Contenedor Principal (Más Grande) ---- */
+
+.tabs-container {
+    width: 100%;
+    max-width: 1024px; /* Aumentamos el tamaño del contenedor */
+    margin: 0; /* Elimina márgenes */
+    padding: 0; /* Elimina padding */
+    background: #ffffff; /* Fondo completamente blanco */
+    border-radius: 0; /* Elimina bordes redondeados */
+    box-shadow: none; /* Elimina la sombra */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Mantiene el contenido centrado */
+}
+/* ---- Encabezado de las pestañas ---- */
+.tabs-header {
+    display: flex;
+    width: 100%;
+    border-bottom: 2px solid #ddd;
+    justify-content: center;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px; /* Más pequeño */
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+    max-width: 250px;
+}
+
+.tab-button:hover {
+    color: #007acc;
+}
+
+.tab-button.active {
+    border-bottom: 4px solid #007acc;
+    color: #007acc;
+}
+
+/* ---- Contenido de las pestañas ---- */
+.tabs-content {
+    padding: 15px;
+    width: 100%;
+    max-width: 900px; /* Ajustamos para un diseño más compacto */
+}
+
+/* ---- Botones de Navegación ---- */
+.nav-buttons {
+    display: flex;
+    justify-content: center; /* Centra los botones */
+    gap: 15px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* ---- Botón General (Más Pequeño) ---- */
+.nav-button {
+    padding: 8px 12px; /* Más pequeño */
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    font-weight: bold;
+    text-align: center;
+    min-width: 120px; /* Tamaño uniforme */
+}
+
+/* ---- Botón Siguiente ---- */
+.next-button {
+    background-color: #007acc;
+    color: white;
+    border: none;
+}
+
+.next-button:hover {
+    background-color: #005fa3;
+}
+
+/* ---- Botón Atrás ---- */
+.back-button {
+    background-color: #ccc;
+    color: #333;
+    border: none;
+}
+
+.back-button:hover {
+    background-color: #bbb;
+}
+
+/* ---- Responsividad (Aún más compacto en móviles) ---- */
+@media (max-width: 768px) {
+    .tabs-container {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .tab-button {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .nav-button {
+        font-size: 12px;
+        padding: 6px 10px;
+        min-width: 100px;
+    }
+
+    .tabs-content {
+        padding: 10px;
+        max-width: 100%;
+    }
+}

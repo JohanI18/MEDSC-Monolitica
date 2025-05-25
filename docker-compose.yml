@@ -7,7 +7,7 @@ services:
     container_name: clinic_mysql_db
     restart: always
     env_file:
-      - ./.env # Carga las variables de entorno desde el archivo .env
+      - ./app/.env # Carga las variables de entorno desde el archivo .env
     environment:
       # Estas variables son para configurar el MySQL dentro del contenedor
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # Usará la del .env

@@ -1,0 +1,57 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+
+{% extends 'layout.html' %}
+
+<!-- {% block title %}Login{% endblock %} -->
+
+{% block body %}
+
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="profile-section">
+            <div class="profile-pic"></div>
+            <p class="doctor-name"> Dr. Who</p>
+            <p class="doctor-role">Cardio</p>
+        </div>
+
+        <nav>
+            <ul>
+                <li>
+                    <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}", method="POST">
+                        <button class="nav-button">AGREGAR PACIENTE</button>
+                    </form>
+                    <!-- <a class="nav-button" href="">AGREGAR PACIENTE</a> -->
+                </li>
+                <li>
+                    <form action="{{ url_for('clinic.home', view='addAttention') }}">
+                        <button class="nav-button">AGREGAR ATENCIÓN</button>
+                    </form>
+                    <!-- <a class="nav-button" href="">AGREGAR ATENCIÓN</a> -->
+                </li>
+            </ul>
+        </nav>
+    </aside>
+    
+    <main class="main-content">
+        {% if view == 'home' %}
+            {% include 'partials/_homeContent.html' %}
+        {% elif view == 'addPatient' %}
+        <div class="patient-container">
+            <h1 class="patient-title">Agregar Paciente</h1>
+
+            {% include 'partials/_addPatient.html' %}            
+
+            <button class="patient-back-link">Volver</button>
+        </div>
+        {% elif view == 'addAttention' %}
+        <div class="attention-container">
+
+            {% include 'partials/_addAttention.html' %}
+
+            <button class="patient-back-link">Volver</button>
+        </div>
+        {% endif %}
+    </main>
+</div>
+
+{% endblock %}
