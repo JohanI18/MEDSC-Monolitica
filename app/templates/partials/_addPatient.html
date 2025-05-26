@@ -12,7 +12,12 @@
       </form>
 
       <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatientInfo') }}", method="POST">
-        <button class="tab-button { % if sec_view=='addPatientInfo' % } active print('dentro') { % endif % }">Información adicional</button>
+        {% if sec_view=="addPatientInfo" %}
+          <button class="tab-button active">Información Adicional</button>
+        {% else %}
+          <button class="tab-button">Información Adicional</button>
+        {% endif %}
+        <!-- <button class="tab-button { % if sec_view=='addPatientInfo' % } active print('dentro') { % endif % }">Información adicional</button> -->
       </form>
 
         <!-- <a class="tab-button" href="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}">Datos del Paciente</a> -->
@@ -30,10 +35,17 @@
           {% include 'partials/_preExistingConditionForm.html' %}
         </div>
       {% endif %}
-    </div>  
+    </div>
 
-</div>
-
-<div class="tabs-content">
-
+    <div class="nav-buttons">
+      {% if sec_view == "addPatientInfo" %}
+        <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}", method="POST">
+          <button class="nav-button back-button">Atrás</button>
+        </form>
+      {% elif sec_view == "addPatient" %}
+        <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatientInfo') }}", method="POST">
+          <button class="nav-button next-button">Siguiente</button>
+        </form>
+      {% endif %}
+    </div>
 </div>

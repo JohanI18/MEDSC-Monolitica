@@ -12,4 +12,6 @@ database = os.getenv("MYSQL_DATABASE")
 
 DATABASE_CONNECTION_URI = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
 
-SECRET_KEY = secrets.token_urlsafe(32)
+# En Producción, asegúrate de generar una clave secreta segura
+# SECRET_KEY = secrets.token_urlsafe(32)
+SECRET_KEY = "1234"

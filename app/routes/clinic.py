@@ -19,6 +19,8 @@ def home():
 
     if view == 'home':
         patients = Patient.query.all()
+        sessionID = session['cedula']
+        # print("sessionID", sessionID)
         return render_template('home.html', view=view, patients=patients)
     elif view == 'addPatient':
         sec_view = request.args.get("sec_view", "addPatient")
@@ -27,6 +29,7 @@ def home():
         elif sec_view == 'addPatientInfo':
             return render_template('home.html', view=view, sec_view=sec_view)            
     elif view == 'addAttention':
+        # print("addAttention")
         return render_template('home.html', view=view)
     # return redirect(url_for('clinic.home'))
     return render_template('home.html')

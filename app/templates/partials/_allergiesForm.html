@@ -1,1 +1,29 @@
-<h1>allergies form</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/allergiesForm.css') }}">
+
+<div class="allergy-container">
+    <h2 class="allergy-title"></h2>
+    
+    {% include 'partials/_message.html' %}
+
+    <form action="/add-allergies" class="allergy-form", method="POST">
+        <div class="input-button-container">
+            <input type="text" name="allergy" placeholder="Ingrese una alergia" required>
+            <button type="submit">Agregar</button>
+        </div>
+
+        <ul class="allergy-list">
+            {% for allergy in allergies %}
+                <li>
+                    <span>{{ allergy }}</span>
+                    <button type="button">Eliminar</button>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- deberia ir hacia una funcion para guardar, si el action esta vacio toma add-allergies y coomo esta vacio no continua. -->
+        <form action=""> 
+            <button type="button" class="save-allergies-btn">Guardar Alergias</button>
+        </form>
+    </form>
+
+</div>

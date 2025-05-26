@@ -23,7 +23,7 @@
                     <!-- <a class="nav-button" href="">AGREGAR PACIENTE</a> -->
                 </li>
                 <li>
-                    <form action="{{ url_for('clinic.home', view='addAttention') }}">
+                    <form action="{{ url_for('clinic.home', view='addAttention') }}", method="POST">
                         <button class="nav-button">AGREGAR ATENCIÓN</button>
                     </form>
                     <!-- <a class="nav-button" href="">AGREGAR ATENCIÓN</a> -->
@@ -41,14 +41,23 @@
 
             {% include 'partials/_addPatient.html' %}            
 
-            <button class="patient-back-link">Volver</button>
+            <form action="{{ url_for('clinic.home', view='home') }}">
+                <button class="patient-back-link"> ← Volver </button>    
+            </form>
+
+            <!-- <button class="patient-back-link">← Volver</button> -->
         </div>
         {% elif view == 'addAttention' %}
         <div class="attention-container">
+            <h1 class="attention-title">Agregar Atención</h1>
 
             {% include 'partials/_addAttention.html' %}
 
-            <button class="patient-back-link">Volver</button>
+            <form action="{{ url_for('clinic.home', view='home') }}">
+                <button class="patient-back-link"> ← Volver </button>    
+            </form>
+
+            <!-- <button class="patient-back-link"> ← Volver </button> -->
         </div>
         {% endif %}
     </main>

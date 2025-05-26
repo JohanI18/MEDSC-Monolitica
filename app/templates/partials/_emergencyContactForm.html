@@ -1,1 +1,24 @@
-<h1>emergency contact form</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/emergencyContactForm.css') }}">
+
+<div class="contact-container">
+    <h2 class="contact-title">Agregar Contactos de Emergencia</h2>
+
+    {% include 'partials/_message.html' %}
+
+    <form class="contact-form" action="/add-contact">
+        <div class="input-button-container">
+            <input type="text" name="firstName" placeholder="Nombre" required>
+            <input type="text" name="lastName" placeholder="Apellido" required>
+        </div>
+
+        <input type="text" name="address" placeholder="Dirección" required>
+        <input type="text" name="relationship" placeholder="Relación" required>
+
+        <div class="input-button-container">
+            <input type="text" name="phoneNumber1" placeholder="Teléfono 1" required>
+            <input type="text" name="phoneNumber2" placeholder="Teléfono 2">
+        </div>
+
+        <button type="submit">Agregar Contacto</button>
+    </form>
+</div>
