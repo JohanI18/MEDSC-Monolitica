@@ -1,7 +1,7 @@
 __pycache__/
 app/.venv
-app/.env
 app/env
 mysql_data
 app/__pycache__/models.cpython-313.pyc
+.env
 .vscode
