@@ -38,13 +38,9 @@ MYSQL_ROOT_PASSWORD=tu_contraseña_root_mysql
 
 ## 5. Ejecutar la aplicación
 
-* Para crear la base de datos (según el script `create_db.py`):
+* Para ejecutar el servidor flask (según el script `index.py`):
 
 ```bash
-python app/create_db.py
+python app/index.py
 ```
-
-
-
-¿Quieres que te lo guarde en un archivo para descargarlo?
-```
+El servidor estará corriendo en: http://127.0.0.1:5000 

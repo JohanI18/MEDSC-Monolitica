@@ -5,25 +5,22 @@ import bcrypt
 
 login = Blueprint('login', __name__)
 
-@login.route('/login', methods=['GET','POST'])
+@login.route('/login', methods=['GET', 'POST'])
 def new_login():
-    credential = Credentials.query.get(1)
-    # credential = session.get('Credentials', 1)
-    
-    
-    cedula = request.form['cedula']
-    password = request.form['password']
+    if request.method == 'POST':
+        cedula = request.form['cedula']
+        password = request.form['password']
 
-    if cedula == credential.identifierCode and bcrypt.checkpw(password.encode('utf-8'), credential.password.encode('utf-8')):
-        session['autenticado'] = True
-        session['cedula'] = cedula
-        return redirect(url_for('clinic.home'))
-    else:
-        flash('Invalid credentials')
-        
+        credential = Credentials.query.filter_by(identifierCode=cedula).first()
 
-    db.session.commit()
+        if credential and bcrypt.checkpw(password.encode('utf-8'), credential.password.encode('utf-8')):
+            session['autenticado'] = True
+            session['cedula'] = cedula
+            return redirect(url_for('clinic.home'))
+        else:
+            flash('Credenciales inválidas', 'danger')
+            return redirect(url_for('login.new_login'))
 
-    # return render_template('login.html', error='Invalid credentials')
-    return redirect(url_for('clinic.index'))
+    return render_template('login.html')
+
 

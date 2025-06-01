@@ -1,6 +1,6 @@
 /* ---- Contenedor Principal ---- */
-.patient-container {
-    max-width: 450px;
+.patient-container, .attention-container  {
+    max-width: 2500px;
     margin: auto;
     background: #ffffff; /* Fondo gris claro */
     padding: 20px;
@@ -96,6 +96,16 @@
 .patients-form button:active {
     transform: scale(0.98);
 }
+.patient-form-wrapper {
+    max-width: 2100px;  /* O más si lo deseas */
+    width: 100%;
+    padding: 30px 40px;
+    margin: auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 
 /* ---- Media Queries para Responsividad ---- */
 
@@ -135,3 +145,58 @@
         padding: 10px;
     }
 }
+
+.tabs-content {
+    max-width: 1200px;
+    width: 100%;
+    margin: auto;
+    padding: 20px;
+}
+/* Contenedor común para ambas pestañas internas */
+.tab-inner-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Contenedor con ancho consistente */
+.tab-form-wrapper {
+  width: 100%;
+  max-width: 2000px;
+  padding: 20px;
+}
+.form-wrapper-wide {
+  max-width: 2400px;
+  width: 100%;
+}
+.center-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+    .patient-form-standalone {
+    max-width: 1400px;
+    margin: 60px auto;
+    padding: 40px 50px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.06);
+  }
+
+  @media (max-width: 768px) {
+    .patient-form-standalone {
+      padding: 20px;
+    }
+  }
+
+  .patient-form-standalone h3 {
+    font-weight: bold;
+    color: #007acc;
+  }
+
+  .btn-submit-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }

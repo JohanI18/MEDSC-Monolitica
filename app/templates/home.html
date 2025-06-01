@@ -36,8 +36,9 @@
         {% if view == 'home' %}
             {% include 'partials/_homeContent.html' %}
         {% elif view == 'addPatient' %}
-        <div class="patient-container">
+        <div class="patient-container" style="max-width: 1600px; padding: 40px;">
             <h1 class="patient-title">Agregar Paciente</h1>
+
 
             {% include 'partials/_addPatient.html' %}            
 

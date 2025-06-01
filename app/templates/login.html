@@ -3,29 +3,25 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-
-<div class="login-container">
-    <div class="login-box">
-        <h2 class="login-title">INICIO</h2>
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+        <h2 class="text-center text-primary mb-4">Inicio de Sesión</h2>
 
         {% include 'partials/_message.html' %}
 
-        <!-- Contenedor para alinear etiquetas e inputs -->
-         <form action="/login" method="POST">
-            <div class="input-group">
-            <label for="cedula">Ingresa tu número de cédula:</label>
-            <input type="text" name="cedula" placeholder="123456789" class="login-input" required>
+        <form action="/login" method="POST">
+            <div class="mb-3">
+                <label for="cedula" class="form-label">Cédula</label>
+                <input type="text" class="form-control" id="cedula" name="cedula" placeholder="123456789" required>
             </div>
 
-            <div class="input-group">
-            <label for="password">Ingresa tu contraseña:</label>
-            <input type="text" name="password" placeholder="password" class="login-input" required>
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
             </div>
 
-            <button class="login-button">INGRESAR</button>
-         </form>
-         
+            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+        </form>
     </div>
 </div>
-
 {% endblock %}

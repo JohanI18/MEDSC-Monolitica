@@ -294,3 +294,13 @@
 .condition-list button {
     margin-left: 10px;
 }
+.patient-container, .attention-container  {
+    max-width: 2500px;
+    margin: auto;
+    background: #ffffff; /* Fondo gris claro */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 90%; /* Se adapta a pantallas más pequeñas */
+}

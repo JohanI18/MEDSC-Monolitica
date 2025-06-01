@@ -88,6 +88,14 @@ label {
     transform: scale(1.02);
 }
 
+body {
+    background: linear-gradient(
+        to bottom right,
+        oklab(59.61% 0.045 -0.113),
+        oklab(84.22% -0.106 -0.031)
+    );
+}
+
 /* ---- Responsive para móviles ---- */
 @media (max-width: 480px) {
     .login-box {
