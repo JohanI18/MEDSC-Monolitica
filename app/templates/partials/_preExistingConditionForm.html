@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/preExistingConditionForm.css') }}">
+
+ <h2 class="condition-title">Agregar Condiciones Prexistentes</h2>
+
+    {% include 'partials/_message.html' %}
+
+    <form action="/add-conditions" class="condition-form", method="POST">
+        <input type="text" name="diseaseName" placeholder="Nombre de la enfermedad" required>
+        <input type="date" name="time" required>
+        <input type="text" name="medicament" placeholder="medicamento" required>
+        <input type="text" name="treatment" placeholder="Tratamiento" required>
+
+        <button class="add-condition-btn">Agregar Condición</button>
+    </form>
+
+    <div class="condition-list-container">
+        <ul class="condition-list">
+            {% for condition in preExistingConditions %}
+                <li>
+                    <span>{{ condition }}</span>
+                    <button type="button">Eliminar</button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <form action="">
+        <button type="button" class="save-condition-btn">Guardar Condiciones</button>
+    </form>

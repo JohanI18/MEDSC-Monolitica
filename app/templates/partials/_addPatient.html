@@ -1,0 +1,44 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tabs.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="tabs-header" >
+      <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}" method="POST">
+        <button class="tab-button {{ 'active' if sec_view == 'addPatient' else '' }}">
+          <i class="fas fa-id-card me-1" ></i> Datos del Paciente
+        </button>
+      </form>
+      <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatientInfo') }}" method="POST">
+        <button class="tab-button {{ 'active' if sec_view == 'addPatientInfo' else '' }}">
+          <i class="fas fa-info-circle me-1"></i> Información Adicional
+        </button>
+      </form>
+    </div>
+
+    <!-- Contenido de las pestañas -->
+    <div class="tabs-content">
+      <div class="tab-inner-container">
+        <div class="tab-form-wrapper">
+          {% if sec_view == "addPatient" %}
+            {% include 'partials/_patientForm.html' %}
+          {% elif sec_view == "addPatientInfo" %}
+            {% include 'partials/_emergencyContactForm.html' %}
+            {% include 'partials/_allergiesForm.html' %}
+            {% include 'partials/_familyBackgroundForm.html' %}
+            {% include 'partials/_preExistingConditionForm.html' %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de navegación -->
+    <div class="nav-buttons">
+      {% if sec_view == "addPatientInfo" %}
+        <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}" method="POST">
+          <button class="nav-button back-button"><i class="fas fa-arrow-left me-1"></i>Atrás</button>
+        </form>
+      {% elif sec_view == "addPatient" %}
+        <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatientInfo') }}" method="POST">
+          <button class="nav-button next-button">Siguiente <i class="fas fa-arrow-right ms-1"></i></button>
+        </form>
+      {% endif %}
+    </div>

@@ -1,0 +1,17 @@
+<div>
+  <h2>Lista de Pacientes</h2>
+
+  {% if loading %}
+  <p>Cargando pacientes...</p>
+  {% else %} {% if patients %}
+  <ul>
+    {% for patient in patients %}
+    <li>
+      {{ patient.firstName }} {{ patient.lastName1 }} ({{ patient.identifierCode }})
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>No hay pacientes registrados.</p>
+  {% endif %} {% endif %}
+</div>
