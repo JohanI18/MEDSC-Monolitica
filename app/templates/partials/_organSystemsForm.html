@@ -53,4 +53,15 @@
             </li>
         {% endfor %}
     </ul>
+    
+    <!-- Continue to next step button -->
+    {% if organSystemReviews %}
+        <div class="continue-step-container mt-4">
+            <form action="/continue-to-diagnostics" method="POST">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-arrow-right me-2"></i>Continuar a Diagnósticos
+                </button>
+            </form>
+        </div>
+    {% endif %}
 </div>

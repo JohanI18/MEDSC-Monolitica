@@ -29,7 +29,7 @@ selected_patient_id = None
 
 @attention.route('/add-vital-signs', methods=['POST'])
 def add_vital_signs():
-    """Save vital signs data temporarily"""
+    """Save vital signs data temporarily and redirect to next step"""
     global vital_signs_data
     
     if 'cedula' not in session:
@@ -37,32 +37,31 @@ def add_vital_signs():
         return redirect(url_for('clinic.index'))
     
     try:
-        # Store vital signs data temporarily
+        # Store vital signs data temporarily (these will be part of the Attention record)
         vital_signs_data = {
-            'weight': request.form.get('weight'),
-            'height': request.form.get('height'),
-            'temperature': request.form.get('temperature'),
-            'bloodPressure': request.form.get('bloodPressure'),
-            'heartRate': request.form.get('heartRate'),
-            'oxygenSaturation': request.form.get('oxygenSaturation'),
-            'breathingFrequency': request.form.get('breathingFrequency'),
-            'glucose': request.form.get('glucose'),
-            'hemoglobin': request.form.get('hemoglobin')
+            'weight': request.form.get('weight') if request.form.get('weight') else None,
+            'height': request.form.get('height') if request.form.get('height') else None,
+            'temperature': request.form.get('temperature') if request.form.get('temperature') else None,
+            'bloodPressure': request.form.get('bloodPressure') if request.form.get('bloodPressure') else None,
+            'heartRate': request.form.get('heartRate') if request.form.get('heartRate') else None,
+            'oxygenSaturation': request.form.get('oxygenSaturation') if request.form.get('oxygenSaturation') else None,
+            'breathingFrequency': request.form.get('breathingFrequency') if request.form.get('breathingFrequency') else None,
+            'glucose': request.form.get('glucose') if request.form.get('glucose') else None,
+            'hemoglobin': request.form.get('hemoglobin') if request.form.get('hemoglobin') else None
         }
         
-        flash('Signos vitales guardados temporalmente', 'success')
+        flash('Signos vitales guardados. Proceda con la evaluación inicial.', 'success')
         logger.info("Vital signs data saved temporarily")
         
     except Exception as e:
         logger.error(f"Error saving vital signs: {str(e)}")
         flash('Error al guardar signos vitales', 'error')
     
-    return render_template('home.html', view='addAttention', 
-                         vital_signs_data=vital_signs_data)
+    return redirect(url_for('clinic.home', view='addAttention', step='evaluacion'))
 
 @attention.route('/add-initial-evaluation', methods=['POST'])
 def add_initial_evaluation():
-    """Save initial evaluation data temporarily"""
+    """Save initial evaluation data temporarily and redirect to next step"""
     global evaluation_data
     
     if 'cedula' not in session:
@@ -76,23 +75,22 @@ def add_initial_evaluation():
         
         if not reason_consultation or not current_illness:
             flash('Motivo de consulta y enfermedad actual son requeridos', 'error')
-            return render_template('home.html', view='addAttention')
+            return redirect(url_for('clinic.home', view='addAttention', step='evaluacion'))
         
-        # Store evaluation data temporarily
-        evaluation_data = {
+        # Store evaluation data temporarily (these will be part of the Attention record)
+        evaluation_data.update({
             'reasonConsultation': reason_consultation.strip(),
             'currentIllness': current_illness.strip()
-        }
+        })
         
-        flash('Evaluación inicial guardada temporalmente', 'success')
+        flash('Evaluación inicial guardada. Proceda con el examen físico.', 'success')
         logger.info("Initial evaluation data saved temporarily")
         
     except Exception as e:
         logger.error(f"Error saving initial evaluation: {str(e)}")
         flash('Error al guardar evaluación inicial', 'error')
     
-    return render_template('home.html', view='addAttention', 
-                         evaluation_data=evaluation_data)
+    return redirect(url_for('clinic.home', view='addAttention', step='examen'))
 
 @attention.route('/add-physical-exam', methods=['POST'])
 def add_physical_exam():
@@ -109,7 +107,7 @@ def add_physical_exam():
         
         if not type_examination or not examination:
             flash('Tipo de examen y hallazgos son requeridos', 'error')
-            return render_template('home.html', view='addAttention', physicalExams=physical_exams)
+            return redirect(url_for('clinic.home', view='addAttention', step='examen'))
         
         exam_data = {
             'typeExamination': type_examination.strip(),
@@ -128,7 +126,7 @@ def add_physical_exam():
         logger.error(f"Error adding physical exam: {str(e)}")
         flash('Error al agregar examen físico', 'error')
     
-    return render_template('home.html', view='addAttention', physicalExams=physical_exams)
+    return redirect(url_for('clinic.home', view='addAttention', step='examen'))
 
 @attention.route('/remove-physical-exam', methods=['POST'])
 def remove_physical_exam():
@@ -146,7 +144,7 @@ def remove_physical_exam():
         logger.error(f"Error removing physical exam: {str(e)}")
         flash('Error al eliminar examen', 'error')
     
-    return render_template('home.html', view='addAttention', physicalExams=physical_exams)
+    return redirect(url_for('clinic.home', view='addAttention', step='examen'))
 
 @attention.route('/add-organ-system-review', methods=['POST'])
 def add_organ_system_review():
@@ -163,7 +161,7 @@ def add_organ_system_review():
         
         if not type_review or not review:
             flash('Tipo de revisión y hallazgos son requeridos', 'error')
-            return render_template('home.html', view='addAttention', organSystemReviews=organ_system_reviews)
+            return redirect(url_for('clinic.home', view='addAttention', step='revision'))
         
         review_data = {
             'typeReview': type_review.strip(),
@@ -182,7 +180,7 @@ def add_organ_system_review():
         logger.error(f"Error adding organ system review: {str(e)}")
         flash('Error al agregar revisión de sistema', 'error')
     
-    return render_template('home.html', view='addAttention', organSystemReviews=organ_system_reviews)
+    return redirect(url_for('clinic.home', view='addAttention', step='revision'))
 
 @attention.route('/remove-organ-system-review', methods=['POST'])
 def remove_organ_system_review():
@@ -200,7 +198,7 @@ def remove_organ_system_review():
         logger.error(f"Error removing organ system review: {str(e)}")
         flash('Error al eliminar revisión', 'error')
     
-    return render_template('home.html', view='addAttention', organSystemReviews=organ_system_reviews)
+    return redirect(url_for('clinic.home', view='addAttention', step='revision'))
 
 @attention.route('/add-diagnostic', methods=['POST'])
 def add_diagnostic():
@@ -220,7 +218,7 @@ def add_diagnostic():
         
         if not all([cie10_code, disease, observations, diagnostic_condition, chronology]):
             flash('Todos los campos del diagnóstico son requeridos', 'error')
-            return render_template('home.html', view='addAttention', diagnostics=diagnostics)
+            return redirect(url_for('clinic.home', view='addAttention', step='diagnostico'))
         
         diagnostic_data = {
             'cie10Code': cie10_code.strip(),
@@ -242,7 +240,7 @@ def add_diagnostic():
         logger.error(f"Error adding diagnostic: {str(e)}")
         flash('Error al agregar diagnóstico', 'error')
     
-    return render_template('home.html', view='addAttention', diagnostics=diagnostics)
+    return redirect(url_for('clinic.home', view='addAttention', step='diagnostico'))
 
 @attention.route('/remove-diagnostic', methods=['POST'])
 def remove_diagnostic():
@@ -260,7 +258,7 @@ def remove_diagnostic():
         logger.error(f"Error removing diagnostic: {str(e)}")
         flash('Error al eliminar diagnóstico', 'error')
     
-    return render_template('home.html', view='addAttention', diagnostics=diagnostics)
+    return redirect(url_for('clinic.home', view='addAttention', step='diagnostico'))
 
 @attention.route('/add-treatment', methods=['POST'])
 def add_treatment():
@@ -282,7 +280,7 @@ def add_treatment():
         
         if not all([medicament, via, dosage, unity, frequency, indications]):
             flash('Todos los campos requeridos del tratamiento deben completarse', 'error')
-            return render_template('home.html', view='addAttention', treatments=treatments)
+            return redirect(url_for('clinic.home', view='addAttention', step='tratamiento'))
         
         treatment_data = {
             'medicament': medicament.strip(),
@@ -306,7 +304,7 @@ def add_treatment():
         logger.error(f"Error adding treatment: {str(e)}")
         flash('Error al agregar tratamiento', 'error')
     
-    return render_template('home.html', view='addAttention', treatments=treatments)
+    return redirect(url_for('clinic.home', view='addAttention', step='tratamiento'))
 
 @attention.route('/remove-treatment', methods=['POST'])
 def remove_treatment():
@@ -324,7 +322,7 @@ def remove_treatment():
         logger.error(f"Error removing treatment: {str(e)}")
         flash('Error al eliminar tratamiento', 'error')
     
-    return render_template('home.html', view='addAttention', treatments=treatments)
+    return redirect(url_for('clinic.home', view='addAttention', step='tratamiento'))
 
 @attention.route('/add-histopathology', methods=['POST'])
 def add_histopathology():
@@ -340,7 +338,7 @@ def add_histopathology():
         
         if not histopathology or not histopathology.strip():
             flash('El resultado histopatológico es requerido', 'error')
-            return render_template('home.html', view='addAttention', histopathologies=histopathologies)
+            return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
         
         histo_data = {
             'histopathology': histopathology.strip()
@@ -358,7 +356,7 @@ def add_histopathology():
         logger.error(f"Error adding histopathology: {str(e)}")
         flash('Error al agregar histopatología', 'error')
     
-    return render_template('home.html', view='addAttention', histopathologies=histopathologies)
+    return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
 
 @attention.route('/remove-histopathology', methods=['POST'])
 def remove_histopathology():
@@ -376,7 +374,7 @@ def remove_histopathology():
         logger.error(f"Error removing histopathology: {str(e)}")
         flash('Error al eliminar histopatología', 'error')
     
-    return render_template('home.html', view='addAttention', histopathologies=histopathologies)
+    return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
 
 @attention.route('/add-imaging', methods=['POST'])
 def add_imaging():
@@ -393,7 +391,7 @@ def add_imaging():
         
         if not type_imaging or not imaging:
             flash('Tipo de imagen y resultado son requeridos', 'error')
-            return render_template('home.html', view='addAttention', imagings=imagings)
+            return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
         
         imaging_data = {
             'typeImaging': type_imaging.strip(),
@@ -412,7 +410,7 @@ def add_imaging():
         logger.error(f"Error adding imaging: {str(e)}")
         flash('Error al agregar imagen', 'error')
     
-    return render_template('home.html', view='addAttention', imagings=imagings)
+    return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
 
 @attention.route('/remove-imaging', methods=['POST'])
 def remove_imaging():
@@ -430,7 +428,7 @@ def remove_imaging():
         logger.error(f"Error removing imaging: {str(e)}")
         flash('Error al eliminar imagen', 'error')
     
-    return render_template('home.html', view='addAttention', imagings=imagings)
+    return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
 
 @attention.route('/add-laboratory', methods=['POST'])
 def add_laboratory():
@@ -447,7 +445,7 @@ def add_laboratory():
         
         if not type_exam or not exam:
             flash('Tipo de examen y resultado son requeridos', 'error')
-            return render_template('home.html', view='addAttention', laboratories=laboratories)
+            return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
         
         lab_data = {
             'typeExam': type_exam.strip(),
@@ -466,7 +464,7 @@ def add_laboratory():
         logger.error(f"Error adding laboratory: {str(e)}")
         flash('Error al agregar laboratorio', 'error')
     
-    return render_template('home.html', view='addAttention', laboratories=laboratories)
+    return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
 
 @attention.route('/remove-laboratory', methods=['POST'])
 def remove_laboratory():
@@ -484,11 +482,41 @@ def remove_laboratory():
         logger.error(f"Error removing laboratory: {str(e)}")
         flash('Error al eliminar laboratorio', 'error')
     
-    return render_template('home.html', view='addAttention', laboratories=laboratories)
+    return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
+
+@attention.route('/continue-to-organ-systems', methods=['POST'])
+def continue_to_organ_systems():
+    """Continue to organ systems review step"""
+    flash('Continúe con la revisión de órganos y sistemas.', 'info')
+    return redirect(url_for('clinic.home', view='addAttention', step='revision'))
+
+@attention.route('/continue-to-diagnostics', methods=['POST'])
+def continue_to_diagnostics():
+    """Continue to diagnostics step"""
+    flash('Continúe con los diagnósticos.', 'info')
+    return redirect(url_for('clinic.home', view='addAttention', step='diagnostico'))
+
+@attention.route('/continue-to-treatments', methods=['POST'])
+def continue_to_treatments():
+    """Continue to treatments step"""
+    flash('Continúe con los tratamientos.', 'info')
+    return redirect(url_for('clinic.home', view='addAttention', step='tratamiento'))
+
+@attention.route('/continue-to-extra-exams', methods=['POST'])
+def continue_to_extra_exams():
+    """Continue to extra exams step"""
+    flash('Continúe con los exámenes extras.', 'info')
+    return redirect(url_for('clinic.home', view='addAttention', step='examenes'))
+
+@attention.route('/continue-to-evolution', methods=['POST'])
+def continue_to_evolution():
+    """Continue to evolution step"""
+    flash('Continúe con la evolución del paciente.', 'info')
+    return redirect(url_for('clinic.home', view='addAttention', step='evolucion'))
 
 @attention.route('/add-evolution', methods=['POST'])
 def add_evolution():
-    """Save evolution data temporarily"""
+    """Save evolution data temporarily - this is the final step"""
     global evaluation_data
     
     if 'cedula' not in session:
@@ -500,19 +528,19 @@ def add_evolution():
         
         if not evolution or not evolution.strip():
             flash('La evolución es requerida', 'error')
-            return render_template('home.html', view='addAttention')
+            return redirect(url_for('clinic.home', view='addAttention', step='evolucion'))
         
-        # Update evaluation data with evolution
+        # Store evolution data temporarily (this will be part of the Attention record)
         evaluation_data['evolution'] = evolution.strip()
         
-        flash('Evolución guardada temporalmente', 'success')
+        flash('Evolución guardada. ¡Ya puede finalizar la atención!', 'success')
         logger.info("Evolution data saved temporarily")
         
     except Exception as e:
         logger.error(f"Error saving evolution: {str(e)}")
         flash('Error al guardar evolución', 'error')
     
-    return render_template('home.html', view='addAttention')
+    return redirect(url_for('clinic.home', view='addAttention', step='evolucion'))
 
 @attention.route('/select-patient-for-attention', methods=['POST'])
 def select_patient_for_attention():
@@ -576,13 +604,13 @@ def complete_attention():
             flash('Debe seleccionar un paciente antes de finalizar la atención', 'error')
             return redirect(url_for('clinic.home', view='addAttention'))
         
-        # Validate required data
+        # Validate required data from Attention table fields
         if not evaluation_data.get('reasonConsultation') or not evaluation_data.get('currentIllness'):
-            flash('Debe completar la evaluación inicial antes de finalizar', 'error')
+            flash('Debe completar la evaluación inicial (motivo de consulta y enfermedad actual) antes de finalizar', 'error')
             return redirect(url_for('clinic.home', view='addAttention'))
         
         if not evaluation_data.get('evolution'):
-            flash('Debe completar la evolución antes de finalizar', 'error')
+            flash('Debe completar la evolución del paciente antes de finalizar', 'error')
             return redirect(url_for('clinic.home', view='addAttention'))
         
         # Get doctor information
@@ -597,23 +625,28 @@ def complete_attention():
             flash('Paciente seleccionado no encontrado', 'error')
             return redirect(url_for('clinic.home', view='addAttention'))
         
-        # Create new attention
+        # Create new attention with all Attention table fields
         new_attention = Attention(
+            # Date and time
             date=datetime.now(),
-            weight=vital_signs_data.get('weight') if vital_signs_data.get('weight') else None,
-            height=vital_signs_data.get('height') if vital_signs_data.get('height') else None,
-            temperature=vital_signs_data.get('temperature') if vital_signs_data.get('temperature') else None,
+            # Vital signs (from vital_signs_data)
+            weight=float(vital_signs_data.get('weight')) if vital_signs_data.get('weight') else None,
+            height=float(vital_signs_data.get('height')) if vital_signs_data.get('height') else None,
+            temperature=float(vital_signs_data.get('temperature')) if vital_signs_data.get('temperature') else None,
             bloodPressure=vital_signs_data.get('bloodPressure'),
-            heartRate=vital_signs_data.get('heartRate') if vital_signs_data.get('heartRate') else None,
-            oxygenSaturation=vital_signs_data.get('oxygenSaturation') if vital_signs_data.get('oxygenSaturation') else None,
-            breathingFrequency=vital_signs_data.get('breathingFrequency') if vital_signs_data.get('breathingFrequency') else None,
-            glucose=vital_signs_data.get('glucose') if vital_signs_data.get('glucose') else None,
-            hemoglobin=vital_signs_data.get('hemoglobin') if vital_signs_data.get('hemoglobin') else None,
+            heartRate=int(vital_signs_data.get('heartRate')) if vital_signs_data.get('heartRate') else None,
+            oxygenSaturation=int(vital_signs_data.get('oxygenSaturation')) if vital_signs_data.get('oxygenSaturation') else None,
+            breathingFrequency=int(vital_signs_data.get('breathingFrequency')) if vital_signs_data.get('breathingFrequency') else None,
+            glucose=float(vital_signs_data.get('glucose')) if vital_signs_data.get('glucose') else None,
+            hemoglobin=float(vital_signs_data.get('hemoglobin')) if vital_signs_data.get('hemoglobin') else None,
+            # Required fields from evaluation (these are in Attention table)
             reasonConsultation=evaluation_data['reasonConsultation'],
             currentIllness=evaluation_data['currentIllness'],
             evolution=evaluation_data['evolution'],
+            # Foreign keys
             idPatient=patient.id,
             idDoctor=doctor.id,
+            # Audit fields
             created_by=sessionID,
             updated_by=sessionID
         )
@@ -624,7 +657,8 @@ def complete_attention():
         attention_id = new_attention.id
         current_attention_id = attention_id
         
-        # Save all related data
+        # Save all related data (examinations, diagnostics, treatments, etc.)
+        # These are in separate tables linked to Attention
         _save_attention_related_data(attention_id, sessionID)
         
         # Clear temporary data
@@ -634,6 +668,12 @@ def complete_attention():
         logger.info(f"Attention completed for patient {patient.id} by doctor {doctor.id}")
         
         return redirect(url_for('clinic.home'))
+        
+    except ValueError as ve:
+        db.session.rollback()
+        logger.error(f"Value error in attention data: {str(ve)}")
+        flash('Error en los datos numéricos ingresados. Verifique los signos vitales.', 'error')
+        return redirect(url_for('clinic.home', view='addAttention'))
         
     except Exception as e:
         db.session.rollback()

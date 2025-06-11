@@ -44,6 +44,9 @@ def home():
         if selected_patient_id:
             selected_patient = Patient.query.filter_by(id=selected_patient_id, is_deleted=False).first()
         
+        # Get current step for navigation
+        current_step = request.args.get('step', 'vitales')
+        
         return render_template('home.html', view=view,
                              vital_signs_data=vital_signs_data,
                              evaluation_data=evaluation_data,
@@ -56,6 +59,7 @@ def home():
                              laboratories=laboratories,
                              available_patients=available_patients,
                              selected_patient=selected_patient,
-                             selected_patient_id=selected_patient_id)
+                             selected_patient_id=selected_patient_id,
+                             current_step=current_step)
     
     return render_template('home.html')

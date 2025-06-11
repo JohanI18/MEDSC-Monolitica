@@ -52,4 +52,15 @@
             </li>
         {% endfor %}
     </ul>
+    
+    <!-- Continue to next step button -->
+    {% if physicalExams %}
+        <div class="continue-step-container mt-4">
+            <form action="/continue-to-organ-systems" method="POST">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-arrow-right me-2"></i>Continuar a Revisión de Órganos
+                </button>
+            </form>
+        </div>
+    {% endif %}
 </div>

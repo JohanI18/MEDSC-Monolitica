@@ -98,4 +98,15 @@
             </li>
         {% endfor %}
     </ul>
+    
+    <!-- Continue to next step button -->
+    {% if treatments %}
+        <div class="continue-step-container mt-4">
+            <form action="/continue-to-extra-exams" method="POST">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-arrow-right me-2"></i>Continuar a Exámenes Extras
+                </button>
+            </form>
+        </div>
+    {% endif %}
 </div>

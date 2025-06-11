@@ -27,71 +27,103 @@
         <!-- Attention Form Tabs -->
         <ul class="nav nav-tabs flex-wrap justify-content-center" id="attentionTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vitales" type="button" role="tab">
+            <button class="nav-link {{ 'active' if current_step == 'vitales' or not current_step else '' }}" 
+                    data-bs-toggle="tab" data-bs-target="#vitales" type="button" role="tab">
                 <i class="fas fa-heartbeat me-1"></i> Signos Vitales
+                {% if vital_signs_data %}
+                    <i class="fas fa-check-circle ms-1 text-success"></i>
+                {% endif %}
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#evaluacion" type="button" role="tab">
+            <button class="nav-link {{ 'active' if current_step == 'evaluacion' else '' }}" 
+                    data-bs-toggle="tab" data-bs-target="#evaluacion" type="button" role="tab">
                 <i class="fas fa-stethoscope me-1"></i> Evaluación Inicial
+                {% if evaluation_data.get('reasonConsultation') and evaluation_data.get('currentIllness') %}
+                    <i class="fas fa-check-circle ms-1 text-success"></i>
+                {% endif %}
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#examen" type="button" role="tab">
+            <button class="nav-link {{ 'active' if current_step == 'examen' else '' }}" 
+                    data-bs-toggle="tab" data-bs-target="#examen" type="button" role="tab">
                 <i class="fas fa-user-md me-1"></i> Examen Físico
+                {% if physicalExams %}
+                    <i class="fas fa-check-circle ms-1 text-success"></i>
+                {% endif %}
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#revision" type="button" role="tab">
+            <button class="nav-link {{ 'active' if current_step == 'revision' else '' }}" 
+                    data-bs-toggle="tab" data-bs-target="#revision" type="button" role="tab">
                 <i class="fas fa-x-ray me-1"></i> Revisión Órganos
+                {% if organSystemReviews %}
+                    <i class="fas fa-check-circle ms-1 text-success"></i>
+                {% endif %}
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#diagnostico" type="button" role="tab">
+            <button class="nav-link {{ 'active' if current_step == 'diagnostico' else '' }}" 
+                    data-bs-toggle="tab" data-bs-target="#diagnostico" type="button" role="tab">
                 <i class="fas fa-diagnoses me-1"></i> Diagnóstico
+                {% if diagnostics %}
+                    <i class="fas fa-check-circle ms-1 text-success"></i>
+                {% endif %}
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tratamiento" type="button" role="tab">
+            <button class="nav-link {{ 'active' if current_step == 'tratamiento' else '' }}" 
+                    data-bs-toggle="tab" data-bs-target="#tratamiento" type="button" role="tab">
                 <i class="fas fa-pills me-1"></i> Tratamiento
+                {% if treatments %}
+                    <i class="fas fa-check-circle ms-1 text-success"></i>
+                {% endif %}
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#examenes" type="button" role="tab">
+            <button class="nav-link {{ 'active' if current_step == 'examenes' else '' }}" 
+                    data-bs-toggle="tab" data-bs-target="#examenes" type="button" role="tab">
                 <i class="fas fa-flask me-1"></i> Exámenes Extras
+                {% if histopathologies or imagings or laboratories %}
+                    <i class="fas fa-check-circle ms-1 text-success"></i>
+                {% endif %}
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#evolucion" type="button" role="tab">
+            <button class="nav-link {{ 'active' if current_step == 'evolucion' else '' }}" 
+                    data-bs-toggle="tab" data-bs-target="#evolucion" type="button" role="tab">
                 <i class="fas fa-chart-line me-1"></i> Evolución
+                {% if evaluation_data.get('evolution') %}
+                    <i class="fas fa-check-circle ms-1 text-success"></i>
+                {% endif %}
             </button>
         </li>
     </ul>
 
     <!-- Tab content -->
     <div class="tab-content mt-3" style="min-height: 400px;">
-        <div class="tab-pane fade show active" id="vitales" role="tabpanel">
+        <div class="tab-pane fade {{ 'show active' if current_step == 'vitales' or not current_step else '' }}" id="vitales" role="tabpanel">
             {% include 'partials/_vitalSignsForm.html' %}
         </div>
-        <div class="tab-pane fade" id="evaluacion" role="tabpanel">
+        <div class="tab-pane fade {{ 'show active' if current_step == 'evaluacion' else '' }}" id="evaluacion" role="tabpanel">
             {% include 'partials/_initialEvaluationForm.html' %}
         </div>
-        <div class="tab-pane fade" id="examen" role="tabpanel">
+        <div class="tab-pane fade {{ 'show active' if current_step == 'examen' else '' }}" id="examen" role="tabpanel">
             {% include 'partials/_physicalExamForm.html' %}
         </div>
-        <div class="tab-pane fade" id="revision" role="tabpanel">
+        <div class="tab-pane fade {{ 'show active' if current_step == 'revision' else '' }}" id="revision" role="tabpanel">
             {% include 'partials/_organSystemsForm.html' %}
         </div>
-        <div class="tab-pane fade" id="diagnostico" role="tabpanel">
+        <div class="tab-pane fade {{ 'show active' if current_step == 'diagnostico' else '' }}" id="diagnostico" role="tabpanel">
             {% include 'partials/_diagnosticForm.html' %}
         </div>
-        <div class="tab-pane fade" id="tratamiento" role="tabpanel">
+        <div class="tab-pane fade {{ 'show active' if current_step == 'tratamiento' else '' }}" id="tratamiento" role="tabpanel">
             {% include 'partials/_treatmentForm.html' %}
         </div>
-        <div class="tab-pane fade" id="examenes" role="tabpanel">
+        <div class="tab-pane fade {{ 'show active' if current_step == 'examenes' else '' }}" id="examenes" role="tabpanel">
             {% include 'partials/_extraExamsForm.html' %}
         </div>
-        <div class="tab-pane fade" id="evolucion" role="tabpanel">
+        <div class="tab-pane fade {{ 'show active' if current_step == 'evolucion' else '' }}" id="evolucion" role="tabpanel">
             {% include 'partials/_evolutionForm.html' %}
         </div>
     </div>
