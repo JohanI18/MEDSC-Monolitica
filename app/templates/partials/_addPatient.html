@@ -30,15 +30,20 @@
       </div>
     </div>
 
-    <!-- Botones de navegación -->
+    <!-- Botones de navegación simplificados -->
     <div class="nav-buttons">
       {% if sec_view == "addPatientInfo" %}
         <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}" method="POST">
-          <button class="nav-button back-button"><i class="fas fa-arrow-left me-1"></i>Atrás</button>
+          <button type="submit" class="nav-button back-button">
+            <i class="fas fa-arrow-left me-1"></i>Editar Datos Básicos
+          </button>
         </form>
-      {% elif sec_view == "addPatient" %}
-        <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatientInfo') }}" method="POST">
-          <button class="nav-button next-button">Siguiente <i class="fas fa-arrow-right ms-1"></i></button>
+        
+        <!-- Final submit button -->
+        <form action="/complete-patient-registration" method="POST">
+          <button type="submit" class="nav-button complete-button">
+            <i class="fas fa-check-circle me-1"></i>Finalizar y Guardar Paciente
+          </button>
         </form>
       {% endif %}
     </div>

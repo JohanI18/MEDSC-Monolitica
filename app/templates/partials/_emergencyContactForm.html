@@ -1,22 +1,46 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/emergencyContactForm.css') }}">
 
-<h2 class="contact-title">Agregar Contactos de Emergencia</h2>
+<h2 class="contact-title">Agregar Contacto de Emergencia</h2>
 
-    {% include 'partials/_message.html' %}
+{% include 'partials/_message.html' %}
 
-    <form class="contact-form" action="/add-contact">
-        <div class="input-button-container">
-            <input type="text" name="firstName" placeholder="Nombre" required>
-            <input type="text" name="lastName" placeholder="Apellido" required>
-        </div>
+<form action="/add-contact" class="contact-form" method="POST">
+    <div class="form-row">
+        <input type="text" name="firstName" placeholder="Nombre" required>
+        <input type="text" name="lastName" placeholder="Apellido" required>
+    </div>
+    
+    <input type="text" name="address" placeholder="Dirección" required>
+    <input type="text" name="relationship" placeholder="Relación (ej: Madre, Padre, Esposo/a)" required>
+    
+    <div class="form-row">
+        <input type="tel" name="phoneNumber1" placeholder="Teléfono Principal" required>
+        <input type="tel" name="phoneNumber2" placeholder="Teléfono Secundario (opcional)">
+    </div>
 
-        <input type="text" name="address" placeholder="Dirección" required>
-        <input type="text" name="relationship" placeholder="Relación" required>
+    <button type="submit" class="add-contact-btn">Agregar Contacto</button>
+</form>
 
-        <div class="input-button-container">
-            <input type="text" name="phoneNumber1" placeholder="Teléfono 1" required>
-            <input type="text" name="phoneNumber2" placeholder="Teléfono 2">
-        </div>
-
-        <button type="submit">Agregar Contacto</button>
-    </form>
+<div class="contact-list-container">
+    <ul class="contact-list">
+        {% for contact in emergencyContacts %}
+            <li class="contact-item">
+                <div class="contact-details">
+                    <strong>{{ contact.firstName }} {{ contact.lastName }}</strong>
+                    <div class="contact-info">
+                        <small>Relación: {{ contact.relationship }}</small>
+                        <small>Dirección: {{ contact.address }}</small>
+                        <small>Tel 1: {{ contact.phoneNumber1 }}</small>
+                        {% if contact.phoneNumber2 %}
+                            <small>Tel 2: {{ contact.phoneNumber2 }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <form action="/remove-contact" method="POST" style="display: inline;">
+                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                    <button type="submit" class="btn-remove">Eliminar</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</div>

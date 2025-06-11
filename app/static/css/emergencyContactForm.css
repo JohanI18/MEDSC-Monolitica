@@ -14,7 +14,8 @@
     color: #007acc;
     font-size: 18px;
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    text-align: center;
 }
 
 /* ---- Mensaje de éxito/error ---- */
@@ -32,17 +33,17 @@
 .contact-form {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
 }
 
-/* ---- Contenedor de Inputs en Línea ---- */
-.input-button-container {
+/* ---- Fila para Inputs ---- */
+.form-row {
     display: flex;
-    width: 100%;
-    max-width: 300px;
-    gap: 5px; /* Espacio entre inputs */
+    gap: 10px;
 }
 
 /* ---- Inputs ---- */
@@ -50,7 +51,7 @@
 .contact-form input {
     max-width: 300px;
     flex: 1;
-    padding: 8px;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 14px;
@@ -59,23 +60,32 @@
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Enfoque en Inputs */
+.contact-form input:focus {
+    border-color: #007acc;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 122, 204, 0.3);
+}
+
 /* ---- Botón de Agregar Contacto ---- */
-.contact-form button {
+.contact-form button,
+.add-contact-btn {
     background-color: #42a5f5;
     color: white;
     border: none;
-    padding: 8px;
+    padding: 12px;
     font-size: 14px;
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    transition: background 0.3s ease, transform 0.2s ease;
+    transition: background 0.3s ease;
     width: 100%;
     max-width: 320px;
 }
 
 /* Efecto hover */
-.contact-form button:hover {
+.contact-form button:hover,
+.add-contact-btn:hover {
     background-color: #2196f3;
 }
 
@@ -90,7 +100,7 @@
 .contact-list {
     list-style: none;
     padding: 0;
-    margin-top: 5px;
+    margin: 0;
     width: 100%;
     max-width: 320px;
     text-align: center; /* Centra el contenido */
@@ -100,33 +110,50 @@
 }
 
 /* ---- Elementos de la Lista ---- */
-.contact-list li {
-    background: white;
+.contact-list li,
+.contact-item {
+    background: #fff;
     border: 1px solid #ddd;
-    padding: 8px;
-    font-size: 14px;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border-radius: 5px;
-    margin-bottom: 4px;
+    align-items: flex-start;
     width: 100%; /* Para que todos tengan el mismo ancho */
     max-width: 300px; /* Tamaño uniforme */
 }
-/* ---- Contenedor de la lista (Asegura centrado total) ---- */
-.contact-list-container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
+
+/* Detalles del contacto */
+.contact-details {
+    flex: 1;
 }
 
+.contact-details strong {
+    color: #007acc;
+    font-size: 16px;
+}
+
+/* Información del contacto */
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 5px;
+}
+
+.contact-info small {
+    color: #666;
+    font-size: 12px;
+}
 
 /* ---- Botón de Eliminar ---- */
-.contact-list button {
+.contact-list button,
+.btn-remove {
     background-color: #ff5252;
     color: white;
     border: none;
-    padding: 5px 8px;
+    padding: 5px 10px;
     font-size: 12px;
     border-radius: 5px;
     cursor: pointer;
@@ -135,24 +162,22 @@
 }
 
 /* Efecto hover */
-.contact-list button:hover {
+.contact-list button:hover,
+.btn-remove:hover {
     background-color: #d32f2f;
 }
 
 /* ---- Estilo del Botón Guardar Contactos ---- */
 .save-contacts-btn {
-    background-color: #42a5f5;
+    background-color: #4caf50;
     color: white;
     border: none;
-    padding: 12px 15px;
-    font-size: 16px;
+    padding: 12px 20px;
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    text-transform: uppercase;
-    transition: background 0.3s ease, transform 0.2s ease;
     width: 100%;
-    max-width: 320px;
+    margin-top: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -162,7 +187,7 @@
 
 /* Efecto hover */
 .save-contacts-btn:hover {
-    background-color: #2196f3;
+    background-color: #45a049;
 }
 
 /* Efecto al hacer clic */
@@ -176,5 +201,13 @@
     color: #666 !important;
     cursor: not-allowed !important;
     box-shadow: none;
+}
+
+/* ---- Contenedor de la lista (Asegura centrado total) ---- */
+.contact-list-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
 }
 

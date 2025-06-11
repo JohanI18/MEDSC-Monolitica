@@ -4,7 +4,7 @@
 
     {% include 'partials/_message.html' %}
 
-    <form action="/add-familyBack" class="background-form", method="POST">
+    <form action="/add-familyBack" class="background-form" method="POST">
         <input type="text" name="familyBackground" placeholder="Antecedentes Familiares" required>
 
         <div class="input-button-continer">
@@ -12,10 +12,10 @@
             
             <select name="degreeRelationship" required>
                 <option value="">Grado de Parentesco</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
+                <option value="1">1er Grado</option>
+                <option value="2">2do Grado</option>
+                <option value="3">3er Grado</option>
+                <option value="4">4to Grado</option>
             </select>
         </div>
 
@@ -27,13 +27,16 @@
         <ul class="background-list">
             {% for background in familyBack %}
                 <li>
-                    <span>{{ background }}</span>
-                    <button type="button">Eliminar</button>
+                    {% if background is mapping %}
+                        <span><strong>{{ background.background }}</strong> - {{ background.time }} (Grado: {{ background.degree }})</span>
+                    {% else %}
+                        <span>{{ background }}</span>
+                    {% endif %}
+                    <form action="/remove-familyBack" method="POST" style="display: inline;">
+                        <input type="hidden" name="index" value="{{ loop.index0 }}">
+                        <button type="submit" class="btn-remove">Eliminar</button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>
     </div>
-
-    <form action="">
-        <button type="button" class="save-backgrounds-btn">Guardar Antecedentes</button>
-    </form>
