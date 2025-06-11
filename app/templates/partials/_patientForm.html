@@ -5,7 +5,12 @@
 
   {% include 'partials/_message.html' %}
 
-  <form action="/add-patients" method="POST">
+  <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatientInfo') }}" method="POST">
+    <!-- Include all the existing form fields as hidden inputs to preserve data -->
+    {% for field_name in ['identifierType', 'identifierCode', 'firstName', 'middleName', 'lastName1', 'lastName2', 'nationality', 'address', 'phoneNumber', 'birthdate', 'gender', 'sex', 'civilStatus', 'job', 'bloodType', 'email'] %}
+      <input type="hidden" name="patient_{{ field_name }}" id="hidden_{{ field_name }}">
+    {% endfor %}
+
     <div class="row g-4">
       <div class="col-md-6">
         <label for="identifierType" class="form-label">Tipo de ID:</label>
@@ -112,11 +117,23 @@
 
 
       <div class="d-flex justify-content-center mt-5">
-        <button type="submit" class="btn btn-primary px-4 py-2">
-          <i class="fas fa-user-plus me-2"></i>Registrar Paciente
+        <button type="submit" class="btn btn-primary px-4 py-2" onclick="copyFormData()">
+          <i class="fas fa-arrow-right me-2"></i>Continuar a Información Adicional
         </button>
       </div>
-
-
-    
   </form>
+
+  <script>
+    function copyFormData() {
+      // Copy form data to hidden fields before submission
+      const fields = ['identifierType', 'identifierCode', 'firstName', 'middleName', 'lastName1', 'lastName2', 'nationality', 'address', 'phoneNumber', 'birthdate', 'gender', 'sex', 'civilStatus', 'job', 'bloodType', 'email'];
+      
+      fields.forEach(field => {
+        const sourceField = document.querySelector(`[name="${field}"]`);
+        const hiddenField = document.getElementById(`hidden_${field}`);
+        if (sourceField && hiddenField) {
+          hiddenField.value = sourceField.value;
+        }
+      });
+    }
+  </script>

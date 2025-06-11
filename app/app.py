@@ -4,6 +4,7 @@ from config import DATABASE_CONNECTION_URI, SECRET_KEY
 from routes.clinic import clinic
 from routes.login import login
 from routes.patients import patients
+from routes.attention import attention  # Add this import
 
 def create_app():
     app = Flask(__name__)
@@ -15,8 +16,10 @@ def create_app():
 
     db.init_app(app)
 
+    # Register blueprints
     app.register_blueprint(clinic)
     app.register_blueprint(login)
     app.register_blueprint(patients)
+    app.register_blueprint(attention)  # Add this line
 
     return app
