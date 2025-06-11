@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session, request, redirect, url_for
-from models.models_flask import Patient
+from models.models_flask import Patient, Doctor
 from utils.db import db
 
 clinic = Blueprint('clinic', __name__)
@@ -16,16 +16,34 @@ def home():
     if not session.get('autenticado'):
         return redirect(url_for('clinic.index'))
 
+    # Get doctor information from session
+    doctor_info = None
+    if 'cedula' in session:
+        try:
+            doctor = Doctor.query.filter_by(
+                identifierCode=session['cedula'], 
+                is_deleted=False
+            ).first()
+            if doctor:
+                doctor_info = {
+                    'firstName': doctor.firstName,
+                    'lastName1': doctor.lastName1,
+                    'speciality': doctor.speciality
+                }
+        except Exception as e:
+            print(f"Error fetching doctor info: {str(e)}")
+            doctor_info = None
+
     if view == 'home':
         patients = Patient.query.all()
         sessionID = session['cedula']
-        return render_template('home.html', view=view, patients=patients)
+        return render_template('home.html', view=view, patients=patients, doctor_info=doctor_info)
     elif view == 'addPatient':
         sec_view = request.args.get("sec_view", "addPatient")
         if sec_view == 'addPatient':
-            return render_template('home.html', view=view, sec_view=sec_view)
+            return render_template('home.html', view=view, sec_view=sec_view, doctor_info=doctor_info)
         elif sec_view == 'addPatientInfo':
-            return render_template('home.html', view=view, sec_view=sec_view)            
+            return render_template('home.html', view=view, sec_view=sec_view, doctor_info=doctor_info)            
     elif view == 'addAttention':
         # Import here to avoid circular imports
         from routes.attention import (
@@ -60,6 +78,7 @@ def home():
                              available_patients=available_patients,
                              selected_patient=selected_patient,
                              selected_patient_id=selected_patient_id,
-                             current_step=current_step)
+                             current_step=current_step,
+                             doctor_info=doctor_info)
     
-    return render_template('home.html')
+    return render_template('home.html', doctor_info=doctor_info)

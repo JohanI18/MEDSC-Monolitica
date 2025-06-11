@@ -10,8 +10,13 @@
     <aside class="sidebar">
         <div class="profile-section">
             <div class="profile-pic"></div>
-            <p class="doctor-name"> Dr. Who</p>
-            <p class="doctor-role">Cardio</p>
+            {% if doctor_info %}
+                <p class="doctor-name">Dr. {{ doctor_info.firstName }} {{ doctor_info.lastName1 }}</p>
+                <p class="doctor-role">{{ doctor_info.speciality }}</p>
+            {% else %}
+                <p class="doctor-name loading">Cargando...</p>
+                <p class="doctor-role loading">...</p>
+            {% endif %}
         </div>
 
         <nav>

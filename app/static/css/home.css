@@ -38,11 +38,48 @@ body {
 .doctor-name {
   font-weight: bold;
   margin-top: 10px;
+  min-height: 20px;
+  transition: opacity 0.3s ease;
+}
+
+.doctor-name.loading {
+  opacity: 0.5;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  color: transparent;
 }
 
 .doctor-role {
   font-size: 13px;
   color: #777;
+  min-height: 16px;
+  transition: opacity 0.3s ease;
+}
+
+.doctor-role.loading {
+  opacity: 0.5;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  color: transparent;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.doctor-info-error {
+  color: #dc3545;
+  font-size: 12px;
+  font-style: italic;
 }
 
 nav {
