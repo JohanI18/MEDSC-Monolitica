@@ -185,6 +185,8 @@ def add_patients():
             
             # Store the ID of the newly created patient
             current_patient_id = new_patient.id
+            # Store the patient ID in the session as well
+            session['current_patient_id'] = new_patient.id
             
             # Clear any existing temporary data
             allergies.clear()

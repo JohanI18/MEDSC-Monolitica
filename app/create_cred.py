@@ -3,7 +3,7 @@ from models.models_flask import db, Doctor, Credentials
 import bcrypt
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://usuario:pass123@127.0.0.1:3306/clinic"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://user:password@127.0.0.1:3306/clinic"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
@@ -15,7 +15,7 @@ with app.app_context():
     try:
         # Crear doctor
         doctor = Doctor(
-            identifierCode="DOC002",
+            identifierCode="DOC001",
             firstName="Lucía",
             middleName="Fernanda",
             lastName1="Mora",
@@ -50,7 +50,7 @@ with app.app_context():
 
         # Crear doctor
         doctor2 = Doctor(
-            identifierCode="DOC003",
+            identifierCode="DOC002",
             firstName="Carlos",
             middleName="Eduardo",
             lastName1="Pérez",
