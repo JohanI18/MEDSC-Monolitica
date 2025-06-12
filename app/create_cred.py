@@ -3,7 +3,7 @@ from models.models_flask import db, Doctor, Credentials
 import bcrypt
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://usuario:pass123@127.0.0.1:3306/clinic"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://user:password@127.0.0.1:3306/clinic"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
@@ -15,7 +15,7 @@ with app.app_context():
     try:
         # Crear doctor
         doctor = Doctor(
-            identifierCode="DOC002",
+            identifierCode="DOC001",
             firstName="Lucía",
             middleName="Fernanda",
             lastName1="Mora",
@@ -42,6 +42,41 @@ with app.app_context():
             updated_by="admin"
         )
         db.session.add(credentials)
+        db.session.commit()
+
+        print("✅ Doctor y credenciales creados correctamente.")
+
+
+
+        # Crear doctor
+        doctor2 = Doctor(
+            identifierCode="DOC002",
+            firstName="Carlos",
+            middleName="Eduardo",
+            lastName1="Pérez",
+            lastName2="García",
+            phoneNumber="0999999998",
+            address="Calle Central #12-50",
+            gender="Masculino",
+            sex="Masculino",
+            speciality="Pediatría",
+            email="carlos.perez@example.com",
+            created_by="admin",
+            updated_by="admin"
+        )
+        db.session.add(doctor2)
+        db.session.commit()
+
+        # Crear credenciales
+        credentials2 = Credentials(
+            identifierCode="DOC003",
+            password=create_hashed_password("clave_segura"),  # Asegúrate de hashear en producción
+            idUser=doctor2.id,
+            userType="doctor",
+            created_by="admin",
+            updated_by="admin"
+        )
+        db.session.add(credentials2)
         db.session.commit()
 
         print("✅ Doctor y credenciales creados correctamente.")

@@ -6,6 +6,11 @@
   {% include 'partials/_message.html' %}
 
   <form action="/add-patients" method="POST">
+    <!-- Include all the existing form fields as hidden inputs to preserve data -->
+    {% for field_name in ['identifierType', 'identifierCode', 'firstName', 'middleName', 'lastName1', 'lastName2', 'nationality', 'address', 'phoneNumber', 'birthdate', 'gender', 'sex', 'civilStatus', 'job', 'bloodType', 'email'] %}
+      <input type="hidden" name="patient_{{ field_name }}" id="hidden_{{ field_name }}">
+    {% endfor %}
+
     <div class="row g-4">
       <div class="col-md-6">
         <label for="identifierType" class="form-label">Tipo de ID:</label>
@@ -113,10 +118,7 @@
 
       <div class="d-flex justify-content-center mt-5">
         <button type="submit" class="btn btn-primary px-4 py-2">
-          <i class="fas fa-user-plus me-2"></i>Agregar Paciente
+          <i class="fas fa-arrow-right me-2"></i>Continuar a Información Adicional
         </button>
       </div>
-
-
-    
   </form>
