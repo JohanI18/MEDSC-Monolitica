@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, request, redirect, url_for
+from flask import Blueprint, render_template, session, request, redirect, url_for, flash
 from models.models_flask import Patient, Doctor
 from utils.db import db
 
@@ -43,7 +43,91 @@ def home():
         if sec_view == 'addPatient':
             return render_template('home.html', view=view, sec_view=sec_view, doctor_info=doctor_info)
         elif sec_view == 'addPatientInfo':
-            return render_template('home.html', view=view, sec_view=sec_view, doctor_info=doctor_info)            
+            # Obtener el modo edición desde los argumentos GET o sesión
+            edit_mode = request.args.get('edit_mode', 'false') == 'true'
+            patient_id = request.args.get('current_patient_id') or session.get('current_patient_id')
+
+
+            if not patient_id:
+                flash("Error: No hay paciente activo para agregar información adicional.", "error")
+                return redirect(url_for('clinic.home', view='addPatient'))
+
+            patient = Patient.query.get(patient_id)
+            if not patient:
+                flash("Error: El paciente no existe.", "error")
+                return redirect(url_for('clinic.home', view='addPatient'))
+
+            # Guardar en sesión por consistencia
+            session['current_patient_id'] = patient.id
+            session['edit_mode'] = edit_mode
+
+            # Obtener relaciones (o listas vacías por seguridad)
+            allergies = patient.allergies if patient.allergies else []
+            emergencyContacts = patient.emergency_contacts if patient.emergency_contacts else []
+            familyBack = patient.family_backgrounds if patient.family_backgrounds else []
+            preExistingConditions = patient.pre_existing_conditions if patient.pre_existing_conditions else []
+
+            return render_template(
+                'home.html',
+                view=view,
+                sec_view=sec_view,
+                doctor_info=doctor_info,
+                edit_mode=edit_mode,
+                patient=patient,
+                current_patient_id=patient.id
+            )
+
+            # Obtener datos desde GET
+            edit_mode = request.args.get('edit_mode', 'false') == 'true'
+            patient_id = request.args.get('current_patient_id') or session.get('current_patient_id')
+
+            if not patient_id:
+                flash("Error: No hay paciente activo para agregar información adicional.", "error")
+                return redirect(url_for('clinic.home', view='addPatient'))
+
+            patient = Patient.query.get(patient_id)
+            if not patient:
+                flash("Error: El paciente no existe.", "error")
+                return redirect(url_for('clinic.home', view='addPatient'))
+
+            # Guardar en sesión por si se necesita en otros pasos
+            session['current_patient_id'] = patient.id
+            session['edit_mode'] = edit_mode
+
+            # Obtener datos relacionados
+            allergies = patient.allergies or []
+            emergencyContacts = patient.emergency_contacts or []
+            familyBack = patient.family_backgrounds or []
+            preExistingConditions = patient.pre_existing_conditions or []
+
+            return render_template(
+                'home.html',
+                view=view,
+                sec_view=sec_view,
+                doctor_info=doctor_info,
+                edit_mode=edit_mode,
+                patient=patient,
+                current_patient_id=patient.id,
+                allergies=allergies,
+                emergencyContacts=emergencyContacts,
+                familyBack=familyBack,
+                preExistingConditions=preExistingConditions
+            )
+
+            edit_mode = session.get('edit_mode', False)
+            patient = None
+            if session.get('current_patient_id'):
+                patient = Patient.query.get(session['current_patient_id'])
+            return render_template(
+                'home.html',
+                view=view,
+                sec_view=sec_view,
+                doctor_info=doctor_info,
+                edit_mode=edit_mode,
+                patient=patient,
+                current_patient_id=session.get('current_patient_id')
+            )
+            
     elif view == 'addAttention':
         # Import here to avoid circular imports
         from routes.attention import (
@@ -81,4 +165,17 @@ def home():
                              current_step=current_step,
                              doctor_info=doctor_info)
     
-    return render_template('home.html', doctor_info=doctor_info)
+    edit_mode = session.get('edit_mode', False)
+    return render_template(
+    'home.html',
+    view=view,
+    sec_view=sec_view,
+    doctor_info=doctor_info,
+    edit_mode=edit_mode,
+    patient=patient,
+    current_patient_id=patient.id,
+    allergies=allergies,
+    emergencyContacts=emergencyContacts,
+    familyBack=familyBack,
+    preExistingConditions=preExistingConditions
+)

@@ -393,3 +393,244 @@ nav ul li a:hover,
     font-size: 14px;
   }
 }
+
+
+  body {
+    background-color: #f5f7fa;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .welcome-wrapper {
+    max-width: 960px;
+    margin: auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .welcome-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-text {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 2rem;
+  }
+
+  .doctor-image {
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+
+  .patients-list-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .search-input {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 1.5rem auto;
+    display: block;
+  }
+
+  #patient-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+
+  #patient-list::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  #patient-list::-webkit-scrollbar-thumb {
+    background-color: #007bff;
+    border-radius: 4px;
+  }
+
+  .patient-card {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+  }
+
+  .patient-card:hover {
+    background-color: #f1f1f1;
+    transform: scale(1.01);
+  }
+
+  .patient-icon {
+    font-size: 1.8rem;
+    color: #007bff;
+    margin-right: 1rem;
+  }
+
+  .patient-info {
+    text-align: left;
+  }
+
+  .patient-name {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .patient-id {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+  }
+
+  /* Modal */
+   .modal-dialog {
+    max-width: 95%;
+    height: 90vh; /* Altura máxima visible */
+  }
+
+  .modal-content {
+    height: 100%;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-body {
+    overflow-y: auto;
+    padding: 1.5rem;
+    flex-grow: 1;
+  }
+
+  .modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    justify-content: flex-end;
+  }
+
+  .modal-body::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb {
+    background-color: #0d6efd;
+    border-radius: 4px;
+  }
+
+  /* Tarjetas internas */
+  .patient-section .card {
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .patient-section .card-header {
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .patient-section .card-body {
+    padding: 1rem 1.25rem;
+    background-color: #ffffff;
+  }
+
+  .modal-title {
+    font-weight: bold;
+    font-size: 1.4rem;
+  }
+
+  @media (max-width: 768px) {
+    .modal-dialog {
+      max-width: 100%;
+      margin: 0;
+      height: 100vh;
+    }
+
+    .modal-content {
+      border-radius: 0;
+    }
+  }
+
+  .compact-card {
+  font-size: 0.92rem;
+  border-radius: 0.4rem;
+}
+
+.compact-card p {
+  margin-bottom: 0.35rem;
+}
+
+.blood-label {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background-color: #444;
+  color: white;
+  font-weight: bold;
+  font-size: 0.7rem;
+  padding: 4px 7px;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.contact-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+  transition: 0.2s ease;
+}
+
+.contact-card:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+}
+
+.contact-card h6 {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.contact-card p {
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.contact-card .badge {
+  font-size: 0.85rem;
+  padding: 0.35em 0.6em;
+  margin-top: 0.3rem;
+}
+
+
+.card .list-group-item:last-child {
+  border-bottom: none;
+}
+.card .list-group-item {
+  padding: 0.5rem 0.75rem;
+}
+.card-body {
+  padding: 1rem;
+}

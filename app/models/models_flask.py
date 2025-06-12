@@ -2,6 +2,13 @@ from utils.db import db
 from sqlalchemy import Enum as SA_Enum
 from sqlalchemy.sql import func
 
+from sqlalchemy import DateTime
+
+# ...
+
+
+
+
 class Patient(db.Model):
     __tablename__ = "patients"
     __table_args__ = {
@@ -203,6 +210,7 @@ class Allergy(db.Model):
     patient = db.relationship("Patient", back_populates="allergies")
 
 class Credentials(db.Model):
+    
     __tablename__ = "credentials"
     __table_args__ = (
         db.UniqueConstraint('identifierCode', 'userType', name='uq_identifierCode_userType'),

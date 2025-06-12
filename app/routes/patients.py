@@ -28,6 +28,106 @@ def show_patients():
         flash('Error al cargar la lista de pacientes', 'error')
         return redirect(url_for('clinic.home'))
 
+
+@patients.route('/editar-paciente/<int:patient_id>', methods=['GET', 'POST'])
+def editar_paciente(patient_id):
+    """
+    Editar un paciente existente desde la misma interfaz de agregar
+    y continuar con información adicional.
+    """
+    from models.models_flask import Doctor
+    global current_patient_id  # 🔴 Importante para usar la variable global
+
+    patient = Patient.query.get_or_404(patient_id)
+
+    # Obtener doctor_info desde la sesión
+    doctor_info = None
+    if 'cedula' in session:
+        doctor = Doctor.query.filter_by(identifierCode=session['cedula'], is_deleted=False).first()
+        if doctor:
+            doctor_info = {
+                'firstName': doctor.firstName,
+                'lastName1': doctor.lastName1,
+                'speciality': doctor.speciality
+            }
+
+    if request.method == 'POST':
+        try:
+            # Actualizar los campos del paciente desde el formulario
+            patient.identifierType = request.form.get('identifierType')
+            patient.identifierCode = request.form.get('identifierCode')
+            patient.firstName = request.form.get('firstName')
+            patient.middleName = request.form.get('middleName')
+            patient.lastName1 = request.form.get('lastName1')
+            patient.lastName2 = request.form.get('lastName2')
+            patient.nationality = request.form.get('nationality')
+            patient.address = request.form.get('address')
+            patient.phoneNumber = request.form.get('phoneNumber')
+            patient.birthdate = request.form.get('birthdate')
+            patient.gender = request.form.get('gender')
+            patient.sex = request.form.get('sex')
+            patient.civilStatus = request.form.get('civilStatus')
+            patient.job = request.form.get('job')
+            patient.bloodType = request.form.get('bloodType')
+            patient.email = request.form.get('email')
+            patient.updated_by = session.get('cedula')
+
+            db.session.commit()
+
+            # 🔴 Guardar en variable global y sesión
+            current_patient_id = patient.id
+            session['current_patient_id'] = patient.id
+            session['edit_mode'] = True
+
+            flash('Paciente actualizado exitosamente. Puede continuar con la información adicional.', 'success')
+            return redirect(url_for(
+                'clinic.home',
+                view='addPatient',
+                sec_view='addPatientInfo',
+                edit_mode='true',
+                current_patient_id=patient.id
+            ))
+
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error actualizando paciente: {str(e)}")
+            flash('Error al actualizar el paciente', 'error')
+
+    return render_template(
+        'home.html',
+        view='addPatient',
+        sec_view='addPatient',
+        patient=patient,
+        edit_mode=True,
+        doctor_info=doctor_info,
+        current_patient_id=patient.id
+    )
+
+
+
+
+
+
+@patients.route('/historial-paciente/<int:patient_id>')
+def patient_details(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
+
+    # Consulta los datos relacionados desde la base de datos
+    allergies = Allergy.query.filter_by(idPatient=patient_id).all()
+    contacts = EmergencyContact.query.filter_by(idPatient=patient_id).all()
+    conditions = PreExistingCondition.query.filter_by(idPatient=patient_id).all()
+    backgrounds = FamilyBackground.query.filter_by(idPatient=patient_id).all()
+
+    return render_template(
+        'partials/_patient_detail.html',
+        patient=patient,
+        allergies=allergies,
+        contacts=contacts,
+        conditions=conditions,
+        backgrounds=backgrounds
+    )
+
 @patients.route('/add-patients', methods=['POST'])
 def add_patients():
     """Add new patient and continue to additional info step"""
@@ -111,40 +211,32 @@ def add_patients():
             return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatient'))
 
 # ALLERGIES ROUTES
-@patients.route('/add-allergies', methods=['GET', 'POST'])
+@patients.route('/add-allergies', methods=['POST'])
 def add_allergies():
-    """Add allergies to temporary storage"""
-    global current_patient_id, allergies
-    
     if 'cedula' not in session:
         flash('Sesión no válida', 'error')
         return redirect(url_for('clinic.index'))
-    
-    if request.method == 'POST':
-        try:
-            new_allergy = request.form.get('allergy')
-            
-            if not new_allergy or not new_allergy.strip():
-                flash('Por favor ingrese una alergia válida', 'error')
-                return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
-            
-            # Store temporarily - don't save to database yet
-            if current_patient_id and new_allergy.strip() not in allergies:
-                allergies.append(new_allergy.strip())
-                flash('Alergia agregada temporalmente', 'info')
-            elif not current_patient_id:
-                flash('Error: No hay paciente activo para agregar alergia', 'error')
-            else:
-                flash('Esta alergia ya existe', 'warning')
-            
-        except Exception as e:
-            logger.error(f"Error adding allergy: {str(e)}")
-            flash('Error al agregar alergia', 'error')
-    
-    return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
-                         allergies=allergies, emergencyContacts=emergencyContacts, 
-                         familyBack=familyBack, preExistingConditions=preExistingConditions,
-                         current_patient_id=current_patient_id)
+
+    patient_id = session.get('current_patient_id')
+    if not patient_id:
+        flash('Error: No hay paciente activo para agregar alergia', 'error')
+        return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
+
+    try:
+        new_allergy = request.form.get('allergy')
+        if not new_allergy or not new_allergy.strip():
+            flash('Por favor ingrese una alergia válida', 'error')
+        elif new_allergy.strip() not in allergies:
+            allergies.append(new_allergy.strip())
+            flash('Alergia agregada temporalmente', 'info')
+        else:
+            flash('Esta alergia ya existe', 'warning')
+
+    except Exception as e:
+        logger.error(f"Error adding allergy: {str(e)}")
+        flash('Error al agregar alergia', 'error')
+
+    return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
 
 @patients.route('/remove-allergy', methods=['POST'])
 def remove_allergy():

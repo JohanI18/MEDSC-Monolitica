@@ -12,10 +12,26 @@
       </form>
       
       {% if current_patient_id %}
-        <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatientInfo') }}" method="POST">
-          <button class="tab-button {{ 'active' if sec_view == 'addPatientInfo' else '' }}">
-            <i class="fas fa-info-circle me-1"></i> Información Adicional
-          </button>
+        {% if current_patient_id %}
+<form action="{{ url_for('clinic.home') }}" method="GET">
+  <input type="hidden" name="view" value="addPatient">
+  <input type="hidden" name="sec_view" value="addPatientInfo">
+  <input type="hidden" name="current_patient_id" value="{{ current_patient_id }}">
+  <input type="hidden" name="edit_mode" value="{{ 'true' if edit_mode else 'false' }}">
+  <button class="tab-button {{ 'active' if sec_view == 'addPatientInfo' else '' }}">
+    <i class="fas fa-info-circle me-1"></i> Información Adicional
+  </button>
+</form>
+
+{% else %}
+  <button class="tab-button disabled" disabled>
+    <i class="fas fa-info-circle me-1"></i> Información Adicional <i class="fas fa-lock ms-1"></i>
+  </button>
+{% endif %}
+
+
+
+
         </form>
       {% else %}
         <button class="tab-button disabled" disabled>

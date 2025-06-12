@@ -6,6 +6,7 @@
 
 {% block body %}
 
+
 <div class="app-container">
     <aside class="sidebar">
         <div class="profile-section">
@@ -59,8 +60,13 @@
         {% if view == 'home' %}
             {% include 'partials/_homeContent.html' %}
         {% elif view == 'addPatient' %}
-        <div class="patient-container" style="max-width: 1600px; padding: 40px;">
-            <h1 class="patient-title">Agregar Paciente</h1>
+<div class="patient-container" style="max-width: 1600px; padding: 40px;">
+    <h1 class="patient-title">
+  {% if edit_mode %}Editar Paciente{% else %}Agregar Paciente{% endif %}
+</h1>
+
+
+
 
 
             {% include 'partials/_addPatient.html' %}            
