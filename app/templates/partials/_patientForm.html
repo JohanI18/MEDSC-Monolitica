@@ -1,151 +1,124 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/patientForms.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-{% include 'partials/_message.html' %}
 
-<h2 class="text-center my-4">
-  {% if edit_mode %}Editar Paciente{% else %}Agregar Nuevo Paciente{% endif %}
-</h2>
 
-<form method="POST" action="{% if edit_mode %}{{ url_for('patients.editar_paciente', patient_id=patient.id) }}{% else %}{{ url_for('patients.add_patients') }}{% endif %}" onsubmit="return validatePatientForm();">
+  {% include 'partials/_message.html' %}
 
-  <div class="row g-4">
+  <form action="/add-patients" method="POST">
+    <!-- Include all the existing form fields as hidden inputs to preserve data -->
+    {% for field_name in ['identifierType', 'identifierCode', 'firstName', 'middleName', 'lastName1', 'lastName2', 'nationality', 'address', 'phoneNumber', 'birthdate', 'gender', 'sex', 'civilStatus', 'job', 'bloodType', 'email'] %}
+      <input type="hidden" name="patient_{{ field_name }}" id="hidden_{{ field_name }}">
+    {% endfor %}
 
-    <!-- Tipo de ID -->
-    <div class="col-md-6">
-      <label for="identifierType" class="form-label">Tipo de ID:</label>
-      <select name="identifierType" class="form-select" required>
-        <option value="">Seleccione Tipo de ID</option>
-        {% for tipo in ['Cedula', 'Pasaporte', 'GeneratedIdentifier'] %}
-        <option value="{{ tipo }}" {% if patient and patient.identifierType == tipo %}selected{% endif %}>{{ tipo }}</option>
-        {% endfor %}
-      </select>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <label for="identifierType" class="form-label">Tipo de ID:</label>
+        <select name="identifierType" id="identifierType" class="form-select" required>
+          <option value="">Seleccione Tipo de ID</option>
+          <option value="Cedula">Cédula:</option>
+          <option value="Pasaporte">Pasaporte:</option>
+          <option value="GeneratedIdentifier">Generado:</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label for="identifierCode" class="form-label">Código de ID:</label>
+        <input type="text" name="identifierCode" class="form-control" required>
+      </div>
+
+      <div class="col-md-6">
+        <label for="firstName" class="form-label">Nombre:</label>
+        <input type="text" name="firstName" class="form-control" required>
+      </div>
+
+      <div class="col-md-6">
+        <label for="middleName" class="form-label">Segundo Nombre:</label>
+        <input type="text" name="middleName" class="form-control">
+      </div>
+
+      <div class="col-md-6">
+        <label for="lastName1" class="form-label">Primer Apellido:</label>
+        <input type="text" name="lastName1" class="form-control" required>
+      </div>
+
+      <div class="col-md-6">
+        <label for="lastName2" class="form-label">Segundo Apellido:</label>
+        <input type="text" name="lastName2" class="form-control">
+      </div>
+
+      <div class="col-md-6">
+        <label for="nationality" class="form-label">Nacionalidad:</label>
+        <input type="text" name="nationality" class="form-control">
+      </div>
+
+      <div class="col-md-6">
+        <label for="address" class="form-label">Dirección:</label>
+        <input type="text" name="address" class="form-control" required>
+      </div>
+
+      <div class="col-md-6">
+        <label for="phoneNumber" class="form-label">Teléfono:</label>
+        <input type="text" name="phoneNumber" class="form-control">
+      </div>
+
+      <div class="col-md-6">
+        <label for="birthdate" class="form-label">Fecha de nacimiento:</label>
+        <input type="date" name="birthdate" class="form-control" required>
+      </div>
+
+      <div class="col-md-6">
+        <label for="gender" class="form-label">Género:</label>
+        <input type="text" name="gender" class="form-control">
+      </div>
+
+      <div class="col-md-6">
+        <label for="sex" class="form-label">Sexo:</label>
+        <input type="text" name="sex" class="form-control">
+      </div>
+
+      <div class="col-md-6">
+        <label for="civilStatus" class="form-label">Estado Civil:</label>
+        <select name="civilStatus" class="form-select">
+          <option value="">Seleccione</option>
+          <option value="Soltero/a">Soltero/a</option>
+          <option value="UniónDeHecho">Unión de Hecho</option>
+          <option value="Casado/a">Casado/a</option>
+          <option value="Divorciado/a">Divorciado/a</option>
+          <option value="Viudo/a">Viudo/a</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label for="job" class="form-label">Ocupación:</label>
+        <input type="text" name="job" class="form-control">
+      </div>
+
+      <div class="col-md-6">
+        <label for="bloodType" class="form-label">Tipo de Sangre:</label>
+        <select name="bloodType" class="form-select">
+          <option value="">Seleccione</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label for="email" class="form-label">Correo Electrónico:</label>
+        <input type="email" name="email" class="form-control">
+      </div>
     </div>
 
-    <div class="col-md-6">
-      <label for="identifierCode" class="form-label">Código de ID:</label>
-      <input type="text" name="identifierCode" class="form-control" required value="{{ patient.identifierCode if patient else '' }}">
-    </div>
 
-    <div class="col-md-6">
-      <label class="form-label">Nombre:</label>
-      <input type="text" name="firstName" class="form-control" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" required value="{{ patient.firstName if patient else '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Segundo Nombre:</label>
-      <input type="text" name="middleName" class="form-control" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]*" value="{{ patient.middleName if patient else '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Primer Apellido:</label>
-      <input type="text" name="lastName1" class="form-control" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" required value="{{ patient.lastName1 if patient else '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Segundo Apellido:</label>
-      <input type="text" name="lastName2" class="form-control" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]*" value="{{ patient.lastName2 if patient else '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Nacionalidad:</label>
-      <input type="text" name="nationality" class="form-control" value="{{ patient.nationality if patient else '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Dirección:</label>
-      <input type="text" name="address" class="form-control" required value="{{ patient.address if patient else '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Teléfono:</label>
-      <input type="text" name="phoneNumber" class="form-control" pattern="^\d{7,15}$" value="{{ patient.phoneNumber if patient else '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Fecha de nacimiento:</label>
-      <input type="date" name="birthdate" class="form-control" required value="{{ patient.birthdate if patient else '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Género:</label>
-      <select name="gender" class="form-select">
-        <option value="">Seleccione</option>
-        {% for g in ['Masculino', 'Femenino', 'No Binario', 'Otro', 'Prefiero no decir'] %}
-        <option value="{{ g }}" {% if patient and patient.gender == g %}selected{% endif %}>{{ g }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Sexo:</label>
-      <select name="sex" class="form-select">
-        <option value="">Seleccione</option>
-        {% for s in ['Masculino', 'Femenino', 'Prefiero no decir'] %}
-        <option value="{{ s }}" {% if patient and patient.sex == s %}selected{% endif %}>{{ s }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Estado Civil:</label>
-      <select name="civilStatus" class="form-select">
-        <option value="">Seleccione</option>
-        {% for status in ['Soltero/a', 'UniónDeHecho', 'Casado/a', 'Divorciado/a', 'Viudo/a'] %}
-        <option value="{{ status }}" {% if patient and patient.civilStatus == status %}selected{% endif %}>{{ status }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Ocupación:</label>
-      <input type="text" name="job" class="form-control" value="{{ patient.job if patient else '' }}">
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Tipo de Sangre:</label>
-      <select name="bloodType" class="form-select">
-        <option value="">Seleccione</option>
-        {% for bt in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
-        <option value="{{ bt }}" {% if patient and patient.bloodType == bt %}selected{% endif %}>{{ bt }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Correo Electrónico:</label>
-      <input type="email" name="email" class="form-control" value="{{ patient.email if patient else '' }}">
-    </div>
-  </div>
-
-  <div class="d-flex justify-content-center mt-5">
-    <button type="submit" class="btn btn-primary px-4 py-2">
-      {% if edit_mode %}
-        <i class="fas fa-edit me-2"></i> Editar Paciente
-      {% else %}
-        <i class="fas fa-arrow-right me-2"></i>Continuar a Información Adicional
-      {% endif %}
-    </button>
-  </div>
-</form>
-
-<script>
-function validatePatientForm() {
-  const phone = document.querySelector('input[name="phoneNumber"]');
-  if (phone && phone.value && !/^\d{7,15}$/.test(phone.value)) {
-    alert("El número de teléfono debe contener solo números (7 a 15 dígitos).");
-    return false;
-  }
-
-  const nameFields = ['firstName', 'middleName', 'lastName1', 'lastName2'];
-  for (let field of nameFields) {
-    const el = document.querySelector(`input[name="${field}"]`);
-    if (el && el.value && !/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(el.value)) {
-      alert("Los nombres y apellidos solo deben contener letras.");
-      return false;
-    }
-  }
-
-  return true;
-}
-</script>
+      <div class="d-flex justify-content-center mt-5">
+        <button type="submit" class="btn btn-primary px-4 py-2">
+          <i class="fas fa-arrow-right me-2"></i>Continuar a Información Adicional
+        </button>
+      </div>
+  </form>

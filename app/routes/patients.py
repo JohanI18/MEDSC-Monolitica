@@ -217,35 +217,40 @@ def add_allergies():
         flash('Sesión no válida', 'error')
         return redirect(url_for('clinic.index'))
 
-    patient_id = session.get('current_patient_id')
-    if not patient_id:
-        flash('Error: No hay paciente activo para agregar alergia', 'error')
-        return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
-
-    try:
-        new_allergy = request.form.get('allergy')
-        if not new_allergy or not new_allergy.strip():
-            flash('Por favor ingrese una alergia válida', 'error')
-        elif new_allergy.strip() not in allergies:
-            allergies.append(new_allergy.strip())
-            flash('Alergia agregada temporalmente', 'info')
-        else:
-            flash('Esta alergia ya existe', 'warning')
-
-    except Exception as e:
-        logger.error(f"Error adding allergy: {str(e)}")
-        flash('Error al agregar alergia', 'error')
-
-    return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
+    if request.method == 'POST':
+        try:
+            new_allergy = request.form.get('allergy')
+            
+            if not new_allergy or not new_allergy.strip():
+                flash('Por favor ingrese una alergia válida', 'error')
+                return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
+            
+            # Store temporarily - don't save to database yet
+            if current_patient_id and new_allergy.strip() not in allergies:
+                allergies.append(new_allergy.strip())
+                flash('Alergia agregada temporalmente', 'info')
+            elif not current_patient_id:
+                flash('Error: No hay paciente activo para agregar alergia', 'error')
+            else:
+                flash('Esta alergia ya existe', 'warning')
+            
+        except Exception as e:
+            logger.error(f"Error adding allergy: {str(e)}")
+            flash('Error al agregar alergia', 'error')
+    
+    return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
+                         allergies=allergies, emergencyContacts=emergencyContacts, 
+                         familyBack=familyBack, preExistingConditions=preExistingConditions,
+                         current_patient_id=current_patient_id)
 
 @patients.route('/remove-allergy', methods=['POST'])
 def remove_allergy():
     """Remove allergy from temporary storage"""
     try:
-        index = int(request.form.get('index', -1))
-        if 0 <= index < len(allergies):
-            removed_allergy = allergies.pop(index)
-            flash(f'Alergia "{removed_allergy}" eliminada temporalmente', 'success')
+        allergy_to_remove = request.form.get('allergy', '').strip()
+        if allergy_to_remove in allergies:
+            allergies.remove(allergy_to_remove)
+            flash(f'Alergia "{allergy_to_remove}" eliminada temporalmente', 'success')
         else:
             flash('Alergia no encontrada', 'error')
     except Exception as e:
@@ -597,3 +602,474 @@ def complete_patient_registration():
         logger.error(f"Error completing patient registration: {str(e)}")
         flash('Error al completar el registro del paciente', 'error')
         return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
+
+@patients.route('/get-patient-details/<int:patient_id>')
+def get_patient_details(patient_id):
+    """Get detailed patient information including all related data"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    try:
+        # Get patient with all related data
+        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
+        if not patient:
+            return jsonify({'success': False, 'error': 'Paciente no encontrado'}), 404
+        
+        # Get all related information
+        allergies = Allergy.query.filter_by(idPatient=patient_id, is_deleted=False).all()
+        emergency_contacts = EmergencyContact.query.filter_by(idPatient=patient_id, is_deleted=False).all()
+        pre_existing_conditions = PreExistingCondition.query.filter_by(idPatient=patient_id, is_deleted=False).all()
+        family_backgrounds = FamilyBackground.query.filter_by(idPatient=patient_id, is_deleted=False).all()
+        
+        # Get attention history with related data
+        from models.models_flask import Attention, Doctor, Diagnostic
+        attentions = Attention.query.filter_by(idPatient=patient_id, is_deleted=False)\
+                                  .order_by(Attention.date.desc())\
+                                  .limit(10)\
+                                  .all()
+        
+        # Render the patient details template
+        html_content = render_template('partials/_patientDetails.html',
+                                     patient=patient,
+                                     allergies=allergies,
+                                     emergency_contacts=emergency_contacts,
+                                     pre_existing_conditions=pre_existing_conditions,
+                                     family_backgrounds=family_backgrounds,
+                                     attentions=attentions)
+        
+        return jsonify({'success': True, 'html': html_content})
+        
+    except Exception as e:
+        logger.error(f"Error getting patient details: {str(e)}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
+
+@patients.route('/get-patient-edit-form/<int:patient_id>')
+def get_patient_edit_form(patient_id):
+    """Get patient edit form with all related data"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    try:
+        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
+        if not patient:
+            return jsonify({'success': False, 'error': 'Paciente no encontrado'}), 404
+        
+        # Get all related information for editing
+        allergies = Allergy.query.filter_by(idPatient=patient_id, is_deleted=False).all()
+        emergency_contacts = EmergencyContact.query.filter_by(idPatient=patient_id, is_deleted=False).all()
+        pre_existing_conditions = PreExistingCondition.query.filter_by(idPatient=patient_id, is_deleted=False).all()
+        family_backgrounds = FamilyBackground.query.filter_by(idPatient=patient_id, is_deleted=False).all()
+        
+        # Render the patient edit form template
+        html_content = render_template('partials/_patientEditForm.html',
+                                     patient=patient,
+                                     allergies=allergies,
+                                     emergency_contacts=emergency_contacts,
+                                     pre_existing_conditions=pre_existing_conditions,
+                                     family_backgrounds=family_backgrounds)
+        
+        return jsonify({'success': True, 'html': html_content})
+        
+    except Exception as e:
+        logger.error(f"Error getting patient edit form: {str(e)}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
+
+# Update patient information
+@patients.route('/update-patient/<int:patient_id>', methods=['POST'])
+def update_patient(patient_id):
+    """Update patient information"""
+    if 'cedula' not in session:
+        if request.is_json:
+            return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+        flash('Sesión no válida', 'error')
+        return redirect(url_for('clinic.home', view='patients'))
+    
+    sessionID = session['cedula']
+    
+    try:
+        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
+        if not patient:
+            if request.is_json:
+                return jsonify({'success': False, 'error': 'Paciente no encontrado'}), 404
+            flash('Paciente no encontrado', 'error')
+            return redirect(url_for('clinic.home', view='patients'))
+        
+        # Validate required fields
+        required_fields = ['identifierType', 'identifierCode', 'firstName', 'lastName1', 'address', 'birthdate']
+        for field in required_fields:
+            if not request.form.get(field):
+                if request.is_json:
+                    return jsonify({'success': False, 'error': f'El campo {field} es requerido'}), 400
+                flash(f'El campo {field} es requerido', 'error')
+                return redirect(url_for('clinic.home', view='patients'))
+        
+        # Check if identifier code is unique (excluding current patient)
+        existing_patient = Patient.query.filter(
+            Patient.identifierCode == request.form.get('identifierCode'),
+            Patient.id != patient_id,
+            Patient.is_deleted == False
+        ).first()
+        
+        if existing_patient:
+            if request.is_json:
+                return jsonify({'success': False, 'error': 'Ya existe otro paciente con este código de identificación'}), 400
+            flash('Ya existe otro paciente con este código de identificación', 'error')
+            return redirect(url_for('clinic.home', view='patients'))
+        
+        # Update patient fields
+        patient.identifierType = request.form.get('identifierType')
+        patient.identifierCode = request.form.get('identifierCode')
+        patient.firstName = request.form.get('firstName')
+        patient.middleName = request.form.get('middleName') if request.form.get('middleName') else None
+        patient.lastName1 = request.form.get('lastName1')
+        patient.lastName2 = request.form.get('lastName2') if request.form.get('lastName2') else None
+        patient.nationality = request.form.get('nationality') if request.form.get('nationality') else None
+        patient.address = request.form.get('address')
+        patient.phoneNumber = request.form.get('phoneNumber') if request.form.get('phoneNumber') else None
+        patient.birthdate = request.form.get('birthdate')
+        patient.gender = request.form.get('gender') if request.form.get('gender') else None
+        patient.sex = request.form.get('sex') if request.form.get('sex') else None
+        patient.civilStatus = request.form.get('civilStatus') if request.form.get('civilStatus') else None
+        patient.job = request.form.get('job') if request.form.get('job') else None
+        patient.bloodType = request.form.get('bloodType') if request.form.get('bloodType') else None
+        patient.email = request.form.get('email') if request.form.get('email') else None
+        patient.updated_by = sessionID
+        
+        db.session.commit()
+        
+        logger.info(f"Patient {patient_id} updated successfully by {sessionID}")
+        
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'Paciente actualizado exitosamente'})
+        
+        flash('Paciente actualizado exitosamente', 'success')
+        return redirect(url_for('clinic.home', view='patients'))
+        
+    except IntegrityError as e:
+        db.session.rollback()
+        logger.error(f"Integrity error updating patient: {str(e)}")
+        
+        if request.is_json:
+            return jsonify({'success': False, 'error': 'Error de integridad en los datos'}), 400
+        flash('Error de integridad en los datos', 'error')
+        return redirect(url_for('clinic.home', view='patients'))
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating patient: {str(e)}")
+        
+        if request.is_json:
+            return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
+        flash('Error interno del servidor', 'error')
+        return redirect(url_for('clinic.home', view='patients'))
+
+# Add allergy to patient
+@patients.route('/patient/<int:patient_id>/add-allergy', methods=['POST'])
+def add_patient_allergy(patient_id):
+    """Add allergy to patient"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    sessionID = session['cedula']
+    
+    try:
+        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
+        if not patient:
+            return jsonify({'success': False, 'error': 'Paciente no encontrado'}), 404
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No se recibieron datos'}), 400
+            
+        allergy_text = data.get('allergy', '').strip()
+        
+        if not allergy_text:
+            return jsonify({'success': False, 'error': 'La alergia es requerida'}), 400
+        
+        # Check if allergy already exists
+        existing = Allergy.query.filter_by(
+            idPatient=patient_id, 
+            allergies=allergy_text, 
+            is_deleted=False
+        ).first()
+        
+        if existing:
+            return jsonify({'success': False, 'error': 'Esta alergia ya existe'}), 400
+        
+        new_allergy = Allergy(
+            allergies=allergy_text,
+            idPatient=patient_id,
+            created_by=sessionID,
+            updated_by=sessionID
+        )
+        
+        db.session.add(new_allergy)
+        db.session.commit()
+        
+        logger.info(f"Allergy added to patient {patient_id}: {allergy_text}")
+        return jsonify({'success': True, 'message': 'Alergia agregada exitosamente'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding allergy: {str(e)}")
+        return jsonify({'success': False, 'error': f'Error interno del servidor: {str(e)}'}), 500
+
+# Delete allergy
+@patients.route('/patient/allergy/<int:allergy_id>', methods=['DELETE'])
+def delete_patient_allergy(allergy_id):
+    """Delete patient allergy (soft delete)"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    sessionID = session['cedula']
+    
+    try:
+        allergy = Allergy.query.filter_by(id=allergy_id, is_deleted=False).first()
+        if not allergy:
+            return jsonify({'success': False, 'error': 'Alergia no encontrada'}), 404
+        
+        allergy.is_deleted = True
+        allergy.updated_by = sessionID
+        
+        db.session.commit()
+        
+        logger.info(f"Allergy {allergy_id} soft deleted by {sessionID}")
+        return jsonify({'success': True, 'message': 'Alergia eliminada exitosamente'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting allergy: {str(e)}")
+        return jsonify({'success': False, 'error': f'Error interno del servidor: {str(e)}'}), 500
+
+# Add emergency contact to patient
+@patients.route('/patient/<int:patient_id>/add-contact', methods=['POST'])
+def add_patient_contact(patient_id):
+    """Add emergency contact to patient"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    sessionID = session['cedula']
+    
+    try:
+        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
+        if not patient:
+            return jsonify({'success': False, 'error': 'Paciente no encontrado'}), 404
+        
+        data = request.get_json()
+        
+        required_fields = ['firstName', 'lastName', 'relationship', 'phoneNumber1', 'address']
+        for field in required_fields:
+            if not data.get(field, '').strip():
+                return jsonify({'success': False, 'error': f'El campo {field} es requerido'}), 400
+        
+        new_contact = EmergencyContact(
+            firstName=data['firstName'].strip(),
+            lastName=data['lastName'].strip(),
+            relationship=data['relationship'].strip(),
+            phoneNumber1=data['phoneNumber1'].strip(),
+            phoneNumber2=data.get('phoneNumber2', '').strip() if data.get('phoneNumber2') else None,
+            address=data['address'].strip(),
+            idPatient=patient_id,
+            created_by=sessionID,
+            updated_by=sessionID
+        )
+        
+        db.session.add(new_contact)
+        db.session.commit()
+        
+        logger.info(f"Emergency contact added to patient {patient_id}: {new_contact.firstName} {new_contact.lastName}")
+        return jsonify({'success': True, 'message': 'Contacto agregado exitosamente'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding contact: {str(e)}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
+
+# Delete emergency contact
+@patients.route('/patient/contact/<int:contact_id>', methods=['DELETE'])
+def delete_patient_contact(contact_id):
+    """Delete patient emergency contact (soft delete)"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    sessionID = session['cedula']
+    
+    try:
+        contact = EmergencyContact.query.filter_by(id=contact_id, is_deleted=False).first()
+        if not contact:
+            return jsonify({'success': False, 'error': 'Contacto no encontrado'}), 404
+        
+        contact.is_deleted = True
+        contact.updated_by = sessionID
+        
+        db.session.commit()
+        
+        logger.info(f"Emergency contact {contact_id} soft deleted by {sessionID}")
+        return jsonify({'success': True, 'message': 'Contacto eliminado exitosamente'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting contact: {str(e)}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
+
+# Add pre-existing condition to patient
+@patients.route('/patient/<int:patient_id>/add-condition', methods=['POST'])
+def add_patient_condition(patient_id):
+    """Add pre-existing condition to patient"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    sessionID = session['cedula']
+    
+    try:
+        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
+        if not patient:
+            return jsonify({'success': False, 'error': 'Paciente no encontrado'}), 404
+        
+        data = request.get_json()
+        
+        if not data.get('diseaseName', '').strip() or not data.get('time'):
+            return jsonify({'success': False, 'error': 'Nombre de enfermedad y fecha son requeridos'}), 400
+        
+        new_condition = PreExistingCondition(
+            diseaseName=data['diseaseName'].strip(),
+            time=data['time'],
+            medicament=data.get('medicament', '').strip() if data.get('medicament') else None,
+            treatment=data.get('treatment', '').strip() if data.get('treatment') else None,
+            idPatient=patient_id,
+            created_by=sessionID,
+            updated_by=sessionID
+        )
+        
+        db.session.add(new_condition)
+        db.session.commit()
+        
+        logger.info(f"Pre-existing condition added to patient {patient_id}: {new_condition.diseaseName}")
+        return jsonify({'success': True, 'message': 'Condición agregada exitosamente'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding condition: {str(e)}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
+
+# Delete pre-existing condition
+@patients.route('/patient/condition/<int:condition_id>', methods=['DELETE'])
+def delete_patient_condition(condition_id):
+    """Delete patient pre-existing condition (soft delete)"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    sessionID = session['cedula']
+    
+    try:
+        condition = PreExistingCondition.query.filter_by(id=condition_id, is_deleted=False).first()
+        if not condition:
+            return jsonify({'success': False, 'error': 'Condición no encontrada'}), 404
+        
+        condition.is_deleted = True
+        condition.updated_by = sessionID
+        
+        db.session.commit()
+        
+        logger.info(f"Pre-existing condition {condition_id} soft deleted by {sessionID}")
+        return jsonify({'success': True, 'message': 'Condición eliminada exitosamente'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting condition: {str(e)}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
+
+# Add family background to patient
+@patients.route('/patient/<int:patient_id>/add-family-background', methods=['POST'])
+def add_patient_family_background(patient_id):
+    """Add family background to patient"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    sessionID = session['cedula']
+    
+    try:
+        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
+        if not patient:
+            return jsonify({'success': False, 'error': 'Paciente no encontrado'}), 404
+        
+        data = request.get_json()
+        
+        required_fields = ['familyBackground', 'time', 'degreeRelationship']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'success': False, 'error': f'El campo {field} es requerido'}), 400
+        
+        new_background = FamilyBackground(
+            familyBackground=data['familyBackground'].strip(),
+            time=data['time'],
+            degreeRelationship=data['degreeRelationship'],
+            idPatient=patient_id,
+            created_by=sessionID,
+            updated_by=sessionID
+        )
+        
+        db.session.add(new_background)
+        db.session.commit()
+        
+        logger.info(f"Family background added to patient {patient_id}: {new_background.familyBackground}")
+        return jsonify({'success': True, 'message': 'Antecedente familiar agregado exitosamente'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding family background: {str(e)}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
+
+# Delete family background
+@patients.route('/patient/family-background/<int:background_id>', methods=['DELETE'])
+def delete_patient_family_background(background_id):
+    """Delete patient family background (soft delete)"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    sessionID = session['cedula']
+    
+    try:
+        background = FamilyBackground.query.filter_by(id=background_id, is_deleted=False).first()
+        if not background:
+            return jsonify({'success': False, 'error': 'Antecedente no encontrado'}), 404
+        
+        background.is_deleted = True
+        background.updated_by = sessionID
+        
+        db.session.commit()
+        
+        logger.info(f"Family background {background_id} soft deleted by {sessionID}")
+        return jsonify({'success': True, 'message': 'Antecedente eliminado exitosamente'})
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting family background: {str(e)}")
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
+
+# Delete patient (soft delete)
+@patients.route('/patient/<int:patient_id>/delete', methods=['POST'])
+def delete_patient(patient_id):
+    """Delete patient (soft delete)"""
+    if 'cedula' not in session:
+        return jsonify({'success': False, 'error': 'Sesión no válida'}), 401
+    
+    sessionID = session['cedula']
+    
+    try:
+        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
+        if not patient:
+            return jsonify({'success': False, 'error': 'Paciente no encontrado'}), 404
+        
+        # Soft delete patient
+        patient.is_deleted = True
+        patient.updated_by = sessionID
+        db.session.commit()
+        
+        logger.info(f"Patient {patient_id} soft deleted by {sessionID}")
+        return jsonify({'success': True, 'message': 'Paciente eliminado exitosamente'})
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting patient: {str(e)}")
+        return jsonify({'success': False, 'error': f'Error interno del servidor: {str(e)}'}), 500

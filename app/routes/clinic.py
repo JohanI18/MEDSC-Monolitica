@@ -38,6 +38,15 @@ def home():
         patients = Patient.query.all()
         sessionID = session['cedula']
         return render_template('home.html', view=view, patients=patients, doctor_info=doctor_info)
+    elif view == 'patients':
+        # New patients list view
+        try:
+            patients = Patient.query.filter_by(is_deleted=False).order_by(Patient.firstName, Patient.lastName1).all()
+            return render_template('home.html', view=view, patients=patients, doctor_info=doctor_info)
+        except Exception as e:
+            print(f"Error fetching patients: {str(e)}")
+            patients = []
+            return render_template('home.html', view=view, patients=patients, doctor_info=doctor_info)
     elif view == 'addPatient':
         sec_view = request.args.get("sec_view", "addPatient")
         if sec_view == 'addPatient':

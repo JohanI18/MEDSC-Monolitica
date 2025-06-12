@@ -546,12 +546,14 @@ def add_evolution():
 def select_patient_for_attention():
     """Select patient for current attention"""
     global selected_patient_id
+    
     if 'cedula' not in session:
         flash('Sesión no válida', 'error')
         return redirect(url_for('clinic.index'))
     
     try:
-        patient_id = request.form.get('selectedPatient')
+        # Check if patient was preselected from patient list
+        patient_id = request.form.get('selectedPatient') or request.form.get('preselect_patient')
         
         if not patient_id:
             flash('Debe seleccionar un paciente', 'error')
@@ -571,7 +573,6 @@ def select_patient_for_attention():
         logger.error(f"Error selecting patient: {str(e)}")
         flash('Error al seleccionar paciente', 'error')
     
-    print('5')    
     return redirect(url_for('clinic.home', view='addAttention'))
 
 @attention.route('/change-selected-patient', methods=['POST'])
@@ -840,6 +841,8 @@ def get_doctors():
     except Exception as e:
         logger.error(f"Error getting doctors: {str(e)}")
         return jsonify({'error': 'Error al obtener doctores'}), 500
+
+
 
 
 @attention.route('/get-attention-for-patient', methods=['POST'])

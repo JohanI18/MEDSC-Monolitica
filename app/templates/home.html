@@ -23,9 +23,9 @@
         <nav>
             <ul>
                 <li>
-                    <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}" method="POST">
+                    <form action="{{ url_for('clinic.home', view='patients') }}" method="POST">
                         <button class="nav-button">
-                            <i class="fas fa-user-plus me-2"></i>AGREGAR PACIENTE
+                            <i class="fas fa-users me-2"></i>PACIENTES
                         </button>
                     </form>
                 </li>
@@ -36,13 +36,14 @@
                         </button>
                     </form>
                 </li>
-                <li>
+                                <li>
                     <form action="{{ url_for('clinic.home', view='attentionHistory') }}" method="POST">
                         <button class="nav-button">
                             <i class="fas fa-stethoscope me-2"></i>HISTORIAL DE ATENCIONES
                         </button>
                     </form>
                 </li>
+
                 <li>
                     <form action="{{ url_for('chat.chat_view') }}" method="GET">
                         <button class="nav-button">
@@ -66,23 +67,25 @@
     <main class="main-content">
         {% if view == 'home' %}
             {% include 'partials/_homeContent.html' %}
-        {% elif view == 'addPatient' %}
-<div class="patient-container" style="max-width: 1600px; padding: 40px;">
-    <h1 class="patient-title">
-  {% if edit_mode %}Editar Paciente{% else %}Agregar Paciente{% endif %}
-</h1>
+        {% elif view == 'patients' %}
+        <div class="patient-container" style="max-width: 1600px; padding: 40px;">
+            <h1 class="patient-title">Lista de Pacientes</h1>
 
-
-
-
-
-            {% include 'partials/_addPatient.html' %}            
+            {% include 'partials/_patientList.html' %}
 
             <form action="{{ url_for('clinic.home', view='home') }}">
                 <button class="patient-back-link"> ← Volver </button>    
             </form>
+        </div>
+        {% elif view == 'addPatient' %}
+        <div class="patient-container" style="max-width: 1600px; padding: 40px;">
+            <h1 class="patient-title">Agregar Paciente</h1>
 
-            <!-- <button class="patient-back-link">← Volver</button> -->
+            {% include 'partials/_addPatient.html' %}
+
+            <form action="{{ url_for('clinic.home', view='patients') }}">
+                <button class="patient-back-link"> ← Volver a Pacientes </button>    
+            </form>
         </div>
         {% elif view == 'addAttention' %}
         <div class="attention-container">
@@ -90,6 +93,7 @@
 
             {% include 'partials/_addAttention.html' %}
 
+            
             <form action="{{ url_for('clinic.home', view='home') }}">
                 <button class="patient-back-link"> ← Volver </button>    
             </form>
@@ -101,6 +105,7 @@
             <h1 class="attention-title">Historial de Atenciones</h1>
 
             {% include 'partials/_attentionHistory.html' %}
+
 
             <form action="{{ url_for('clinic.home', view='home') }}">
                 <button class="patient-back-link"> ← Volver </button>    
