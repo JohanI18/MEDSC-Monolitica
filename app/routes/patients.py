@@ -30,7 +30,7 @@ def show_patients():
 
 @patients.route('/add-patients', methods=['POST'])
 def add_patients():
-    """Add new patient with comprehensive error handling and complete registration"""
+    """Add new patient and continue to additional info step"""
     global current_patient_id, allergies, familyBack, preExistingConditions, emergencyContacts
     
     if 'cedula' not in session:
@@ -86,19 +86,17 @@ def add_patients():
             # Store the ID of the newly created patient
             current_patient_id = new_patient.id
             
-            # Save any temporary additional data if exists
-            _save_additional_data(new_patient.id, sessionID)
-            
-            # Clear temporary data
+            # Clear any existing temporary data
             allergies.clear()
             familyBack.clear()
             preExistingConditions.clear()
             emergencyContacts.clear()
-            current_patient_id = None
             
-            logger.info(f"Patient created and registration completed: {new_patient.identifierCode} with ID: {new_patient.id}")
-            flash(f'Paciente {new_patient.firstName} {new_patient.lastName1} registrado exitosamente', 'success')
-            return redirect(url_for('clinic.home'))
+            logger.info(f"Patient created successfully: {new_patient.identifierCode} with ID: {new_patient.id}")
+            flash(f'Datos básicos de {new_patient.firstName} {new_patient.lastName1} guardados. Ahora agregue información adicional.', 'success')
+            
+            # Redirect to additional info step
+            return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
 
         except IntegrityError as e:
             db.session.rollback()
@@ -112,125 +110,50 @@ def add_patients():
             flash('Error al agregar paciente', 'error')
             return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatient'))
 
-def _save_additional_data(patient_id, session_id):
-    """Helper function to save any temporary additional data"""
-    try:
-        # Save allergies if any
-        for allergy_text in allergies:
-            if allergy_text.strip():
-                new_allergy = Allergy(
-                    allergies=allergy_text.strip(),
-                    idPatient=patient_id,
-                    created_by=session_id,
-                    updated_by=session_id
-                )
-                db.session.add(new_allergy)
-        
-        # Save emergency contacts if any
-        for contact_data in emergencyContacts:
-            new_contact = EmergencyContact(
-                firstName=contact_data['firstName'],
-                lastName=contact_data['lastName'],
-                address=contact_data['address'],
-                relationship=contact_data['relationship'],
-                phoneNumber1=contact_data['phoneNumber1'],
-                phoneNumber2=contact_data.get('phoneNumber2'),
-                idPatient=patient_id,
-                created_by=session_id,
-                updated_by=session_id
-            )
-            db.session.add(new_contact)
-        
-        # Save family backgrounds if any
-        for family_data in familyBack:
-            if family_data.get('background') and family_data.get('time') and family_data.get('degree'):
-                new_family_bg = FamilyBackground(
-                    familyBackground=family_data['background'],
-                    time=family_data['time'],
-                    degreeRelationship=family_data['degree'],
-                    idPatient=patient_id,
-                    created_by=session_id,
-                    updated_by=session_id
-                )
-                db.session.add(new_family_bg)
-        
-        # Save pre-existing conditions if any
-        for condition_data in preExistingConditions:
-            if condition_data.get('diseaseName') and condition_data.get('time'):
-                new_condition = PreExistingCondition(
-                    diseaseName=condition_data['diseaseName'],
-                    time=condition_data['time'],
-                    medicament=condition_data.get('medicament'),
-                    treatment=condition_data.get('treatment'),
-                    idPatient=patient_id,
-                    created_by=session_id,
-                    updated_by=session_id
-                )
-                db.session.add(new_condition)
-        
-        db.session.commit()
-        logger.info(f"Additional data saved for patient {patient_id}")
-        
-    except Exception as e:
-        logger.error(f"Error saving additional data: {str(e)}")
-        # Don't raise the exception as the patient is already created
-        pass
-
+# ALLERGIES ROUTES
 @patients.route('/add-allergies', methods=['GET', 'POST'])
 def add_allergies():
-    """Add allergies with improved error handling and persistence"""
+    """Add allergies to temporary storage"""
+    global current_patient_id, allergies
+    
     if 'cedula' not in session:
         flash('Sesión no válida', 'error')
         return redirect(url_for('clinic.index'))
     
-    sessionID = session['cedula']
-    
     if request.method == 'POST':
         try:
             new_allergy = request.form.get('allergy')
-            patient_id = request.form.get('patient_id')  # Get patient ID if available
             
             if not new_allergy or not new_allergy.strip():
                 flash('Por favor ingrese una alergia válida', 'error')
-                return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
-                                     allergies=allergies, emergencyContacts=emergencyContacts, 
-                                     familyBack=familyBack, preExistingConditions=preExistingConditions)
+                return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
             
-            # If we have a patient ID, save directly to database
-            if patient_id:
-                new_allergy_record = Allergy(
-                    allergies=new_allergy.strip(),
-                    idPatient=patient_id,
-                    created_by=sessionID,
-                    updated_by=sessionID
-                )
-                db.session.add(new_allergy_record)
-                db.session.commit()
-                flash('Alergia agregada exitosamente', 'success')
-                logger.info(f"Allergy added for patient {patient_id}: {new_allergy}")
+            # Store temporarily - don't save to database yet
+            if current_patient_id and new_allergy.strip() not in allergies:
+                allergies.append(new_allergy.strip())
+                flash('Alergia agregada temporalmente', 'info')
+            elif not current_patient_id:
+                flash('Error: No hay paciente activo para agregar alergia', 'error')
             else:
-                # Store temporarily if no patient ID
-                if new_allergy.strip() not in allergies:
-                    allergies.append(new_allergy.strip())
-                    flash('Alergia agregada temporalmente', 'info')
+                flash('Esta alergia ya existe', 'warning')
             
         except Exception as e:
-            db.session.rollback()
             logger.error(f"Error adding allergy: {str(e)}")
             flash('Error al agregar alergia', 'error')
     
     return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
                          allergies=allergies, emergencyContacts=emergencyContacts, 
-                         familyBack=familyBack, preExistingConditions=preExistingConditions)
+                         familyBack=familyBack, preExistingConditions=preExistingConditions,
+                         current_patient_id=current_patient_id)
 
 @patients.route('/remove-allergy', methods=['POST'])
 def remove_allergy():
-    """Remove allergy from temporary list"""
+    """Remove allergy from temporary storage"""
     try:
-        allergy_to_remove = request.form.get('allergy')
-        if allergy_to_remove in allergies:
-            allergies.remove(allergy_to_remove)
-            flash('Alergia eliminada', 'success')
+        index = int(request.form.get('index', -1))
+        if 0 <= index < len(allergies):
+            removed_allergy = allergies.pop(index)
+            flash(f'Alergia "{removed_allergy}" eliminada temporalmente', 'success')
         else:
             flash('Alergia no encontrada', 'error')
     except Exception as e:
@@ -239,16 +162,18 @@ def remove_allergy():
     
     return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
                          allergies=allergies, emergencyContacts=emergencyContacts, 
-                         familyBack=familyBack, preExistingConditions=preExistingConditions)
+                         familyBack=familyBack, preExistingConditions=preExistingConditions,
+                         current_patient_id=current_patient_id)
 
+# EMERGENCY CONTACT ROUTES
 @patients.route('/add-contact', methods=['GET', 'POST'])
 def add_contact():
-    """Add emergency contact with improved error handling"""
+    """Add emergency contact to temporary storage"""
+    global current_patient_id, emergencyContacts
+    
     if 'cedula' not in session:
         flash('Sesión no válida', 'error')
         return redirect(url_for('clinic.index'))
-    
-    sessionID = session['cedula']
     
     if request.method == 'POST':
         try:
@@ -258,103 +183,212 @@ def add_contact():
             relationship = request.form.get('relationship')
             phone_number1 = request.form.get('phoneNumber1')
             phone_number2 = request.form.get('phoneNumber2')
-            patient_id = request.form.get('patient_id')
             
             # Validate required fields
             if not all([first_name, last_name, address, relationship, phone_number1]):
                 flash('Por favor complete todos los campos requeridos del contacto de emergencia', 'error')
-                return render_template('home.html', view='addPatient', sec_view="addPatientInfo", emergencyContacts=emergencyContacts)
+                return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
             
-            # If we have a patient ID, save directly to database
-            if patient_id:
-                new_emergency_contact = EmergencyContact(
-                    firstName=first_name.strip(),
-                    lastName=last_name.strip(),
-                    address=address.strip(),
-                    relationship=relationship.strip(),
-                    phoneNumber1=phone_number1.strip(),
-                    phoneNumber2=phone_number2.strip() if phone_number2 else None,
-                    idPatient=patient_id,
-                    created_by=sessionID,
-                    updated_by=sessionID
+            # Store temporarily - don't save to database yet
+            if current_patient_id:
+                contact_data = {
+                    'firstName': first_name.strip(),
+                    'lastName': last_name.strip(),
+                    'address': address.strip(),
+                    'relationship': relationship.strip(),
+                    'phoneNumber1': phone_number1.strip(),
+                    'phoneNumber2': phone_number2.strip() if phone_number2 else None
+                }
+                
+                # Check if contact already exists
+                contact_exists = any(
+                    c['firstName'] == contact_data['firstName'] and 
+                    c['lastName'] == contact_data['lastName'] and
+                    c['phoneNumber1'] == contact_data['phoneNumber1']
+                    for c in emergencyContacts
                 )
-                db.session.add(new_emergency_contact)
-                db.session.commit()
-                flash('Contacto de emergencia agregado exitosamente', 'success')
-                logger.info(f"Emergency contact added for patient {patient_id}: {first_name} {last_name}")
-            else:
-                # Store temporarily
-                contact_data = {
-                    'firstName': first_name.strip(),
-                    'lastName': last_name.strip(),
-                    'address': address.strip(),
-                    'relationship': relationship.strip(),
-                    'phoneNumber1': phone_number1.strip(),
-                    'phoneNumber2': phone_number2.strip() if phone_number2 else None
-                }
-                if contact_data not in emergencyContacts:
-                    emergencyContacts.append(contact_data)
-                    flash('Contacto de emergencia agregado temporalmente', 'info')
-            
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Error adding emergency contact: {str(e)}")
-            flash('Error al agregar contacto de emergencia', 'error')
-    
-    # Handle GET request (when called from URL with parameters)
-    elif request.method == 'GET' and request.args:
-        try:
-            # Extract parameters from URL
-            first_name = request.args.get('firstName')
-            last_name = request.args.get('lastName')
-            address = request.args.get('address')
-            relationship = request.args.get('relationship')
-            phone_number1 = request.args.get('phoneNumber1')
-            phone_number2 = request.args.get('phoneNumber2')
-            
-            if all([first_name, last_name, address, relationship, phone_number1]):
-                contact_data = {
-                    'firstName': first_name.strip(),
-                    'lastName': last_name.strip(),
-                    'address': address.strip(),
-                    'relationship': relationship.strip(),
-                    'phoneNumber1': phone_number1.strip(),
-                    'phoneNumber2': phone_number2.strip() if phone_number2 else None
-                }
-                if contact_data not in emergencyContacts:
+                
+                if not contact_exists:
                     emergencyContacts.append(contact_data)
                     flash('Contacto de emergencia agregado temporalmente', 'info')
                 else:
-                    flash('Contacto de emergencia ya existe', 'warning')
+                    flash('Este contacto ya existe', 'warning')
             else:
-                flash('Datos incompletos para el contacto de emergencia', 'error')
-                
+                flash('Error: No hay paciente activo para agregar contacto', 'error')
+            
         except Exception as e:
-            logger.error(f"Error processing emergency contact from GET: {str(e)}")
-            flash('Error al procesar contacto de emergencia', 'error')
+            logger.error(f"Error adding emergency contact: {str(e)}")
+            flash('Error al agregar contacto de emergencia', 'error')
     
     return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
                          emergencyContacts=emergencyContacts, allergies=allergies, 
-                         familyBack=familyBack, preExistingConditions=preExistingConditions)
+                         familyBack=familyBack, preExistingConditions=preExistingConditions,
+                         current_patient_id=current_patient_id)
 
 @patients.route('/remove-contact', methods=['POST'])
 def remove_contact():
-    """Remove emergency contact from temporary list"""
+    """Remove emergency contact from temporary storage"""
     try:
         index = int(request.form.get('index', -1))
         if 0 <= index < len(emergencyContacts):
-            removed_item = emergencyContacts.pop(index)
-            flash('Contacto de emergencia eliminado', 'success')
+            removed_contact = emergencyContacts.pop(index)
+            flash(f'Contacto "{removed_contact["firstName"]} {removed_contact["lastName"]}" eliminado temporalmente', 'success')
         else:
-            flash('Contacto de emergencia no encontrado', 'error')
+            flash('Contacto no encontrado', 'error')
     except Exception as e:
         logger.error(f"Error removing emergency contact: {str(e)}")
         flash('Error al eliminar contacto de emergencia', 'error')
     
     return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
                          emergencyContacts=emergencyContacts, allergies=allergies, 
-                         familyBack=familyBack, preExistingConditions=preExistingConditions)
+                         familyBack=familyBack, preExistingConditions=preExistingConditions,
+                         current_patient_id=current_patient_id)
 
+# FAMILY BACKGROUND ROUTES
+@patients.route('/add-familyBack', methods=['GET', 'POST'])
+def add_familyBack():
+    """Add family background to temporary storage"""
+    global current_patient_id, familyBack
+    
+    if 'cedula' not in session:
+        flash('Sesión no válida', 'error')
+        return redirect(url_for('clinic.index'))
+    
+    if request.method == 'POST':
+        try:
+            background = request.form.get('familyBackground')
+            time = request.form.get('time')
+            degree_relationship = request.form.get('degreeRelationship')
+            
+            if not background or not background.strip():
+                flash('Por favor ingrese un antecedente familiar válido', 'error')
+                return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
+            
+            # Store temporarily - don't save to database yet
+            if current_patient_id:
+                family_data = {
+                    'background': background.strip(),
+                    'time': time,
+                    'degree': degree_relationship
+                }
+                
+                # Check if family background already exists
+                bg_exists = any(
+                    f['background'] == family_data['background'] and 
+                    f['time'] == family_data['time']
+                    for f in familyBack
+                )
+                
+                if not bg_exists:
+                    familyBack.append(family_data)
+                    flash('Antecedente familiar agregado temporalmente', 'info')
+                else:
+                    flash('Este antecedente familiar ya existe', 'warning')
+            else:
+                flash('Error: No hay paciente activo para agregar antecedente', 'error')
+            
+        except Exception as e:
+            logger.error(f"Error adding family background: {str(e)}")
+            flash('Error al agregar antecedente familiar', 'error')
+    
+    return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
+                         familyBack=familyBack, emergencyContacts=emergencyContacts, 
+                         allergies=allergies, preExistingConditions=preExistingConditions,
+                         current_patient_id=current_patient_id)
+
+@patients.route('/remove-familyBack', methods=['POST'])
+def remove_familyBack():
+    """Remove family background from temporary storage"""
+    try:
+        index = int(request.form.get('index', -1))
+        if 0 <= index < len(familyBack):
+            removed_bg = familyBack.pop(index)
+            flash(f'Antecedente familiar "{removed_bg["background"]}" eliminado temporalmente', 'success')
+        else:
+            flash('Antecedente familiar no encontrado', 'error')
+    except Exception as e:
+        logger.error(f"Error removing family background: {str(e)}")
+        flash('Error al eliminar antecedente familiar', 'error')
+    
+    return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
+                         familyBack=familyBack, emergencyContacts=emergencyContacts, 
+                         allergies=allergies, preExistingConditions=preExistingConditions,
+                         current_patient_id=current_patient_id)
+
+# PRE-EXISTING CONDITIONS ROUTES
+@patients.route('/add-conditions', methods=['GET', 'POST'])
+def add_conditions():
+    """Add pre-existing conditions to temporary storage"""
+    global current_patient_id, preExistingConditions
+    
+    if 'cedula' not in session:
+        flash('Sesión no válida', 'error')
+        return redirect(url_for('clinic.index'))
+    
+    if request.method == 'POST':
+        try:
+            disease_name = request.form.get('diseaseName')
+            time = request.form.get('time')
+            medicament = request.form.get('medicament')
+            treatment = request.form.get('treatment')
+            
+            if not disease_name or not disease_name.strip():
+                flash('Por favor ingrese un nombre de enfermedad válido', 'error')
+                return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
+            
+            # Store temporarily - don't save to database yet
+            if current_patient_id:
+                condition_data = {
+                    'diseaseName': disease_name.strip(),
+                    'time': time,
+                    'medicament': medicament.strip() if medicament else None,
+                    'treatment': treatment.strip() if treatment else None
+                }
+                
+                # Check if condition already exists
+                condition_exists = any(
+                    c['diseaseName'] == condition_data['diseaseName'] and 
+                    c['time'] == condition_data['time']
+                    for c in preExistingConditions
+                )
+                
+                if not condition_exists:
+                    preExistingConditions.append(condition_data)
+                    flash('Condición preexistente agregada temporalmente', 'info')
+                else:
+                    flash('Esta condición ya existe', 'warning')
+            else:
+                flash('Error: No hay paciente activo para agregar condición', 'error')
+            
+        except Exception as e:
+            logger.error(f"Error adding pre-existing condition: {str(e)}")
+            flash('Error al agregar condición preexistente', 'error')
+    
+    return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
+                         preExistingConditions=preExistingConditions, emergencyContacts=emergencyContacts, 
+                         allergies=allergies, familyBack=familyBack,
+                         current_patient_id=current_patient_id)
+
+@patients.route('/remove-condition', methods=['POST'])
+def remove_condition():
+    """Remove pre-existing condition from temporary storage"""
+    try:
+        index = int(request.form.get('index', -1))
+        if 0 <= index < len(preExistingConditions):
+            removed_condition = preExistingConditions.pop(index)
+            flash(f'Condición "{removed_condition["diseaseName"]}" eliminada temporalmente', 'success')
+        else:
+            flash('Condición no encontrada', 'error')
+    except Exception as e:
+        logger.error(f"Error removing pre-existing condition: {str(e)}")
+        flash('Error al eliminar condición preexistente', 'error')
+    
+    return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
+                         preExistingConditions=preExistingConditions, emergencyContacts=emergencyContacts, 
+                         allergies=allergies, familyBack=familyBack,
+                         current_patient_id=current_patient_id)
+
+# COMPLETION AND MANAGEMENT ROUTES
 @patients.route('/complete-patient-registration', methods=['POST'])
 def complete_patient_registration():
     """Save all temporary data to database and complete patient registration"""
@@ -367,40 +401,28 @@ def complete_patient_registration():
     sessionID = session['cedula']
     
     try:
-        # First try to use the tracked current patient ID
-        latest_patient = None
-        if current_patient_id:
-            latest_patient = Patient.query.filter_by(
-                id=current_patient_id,
-                is_deleted=False
-            ).first()
-            logger.info(f"Using tracked patient ID: {current_patient_id}")
-        
-        # Fallback: Get the most recently created patient if current_patient_id is not available
-        if not latest_patient:
-            latest_patient = Patient.query.filter_by(
-                created_by=sessionID,
-                is_deleted=False
-            ).order_by(Patient.created_at.desc()).first()
-            logger.info(f"Fallback: Using most recent patient created by {sessionID}")
-        
-        if not latest_patient:
-            flash('No se encontró el paciente para completar el registro', 'error')
+        if not current_patient_id:
+            flash('No hay paciente activo para completar', 'error')
             return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatient'))
         
-        logger.info(f"Adding additional data for patient ID: {latest_patient.id}, Code: {latest_patient.identifierCode}, Created by: {latest_patient.created_by}")
+        patient = Patient.query.filter_by(id=current_patient_id, is_deleted=False).first()
+        if not patient:
+            flash('Paciente no encontrado', 'error')
+            return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatient'))
         
         # Save allergies
+        saved_count = {'allergies': 0, 'contacts': 0, 'backgrounds': 0, 'conditions': 0}
+        
         for allergy_text in allergies:
             if allergy_text.strip():
                 new_allergy = Allergy(
                     allergies=allergy_text.strip(),
-                    idPatient=latest_patient.id,
+                    idPatient=current_patient_id,
                     created_by=sessionID,
                     updated_by=sessionID
                 )
                 db.session.add(new_allergy)
-                logger.info(f"Adding allergy: {allergy_text} for patient {latest_patient.id}")
+                saved_count['allergies'] += 1
         
         # Save emergency contacts
         for contact_data in emergencyContacts:
@@ -411,12 +433,12 @@ def complete_patient_registration():
                 relationship=contact_data['relationship'],
                 phoneNumber1=contact_data['phoneNumber1'],
                 phoneNumber2=contact_data.get('phoneNumber2'),
-                idPatient=latest_patient.id,
+                idPatient=current_patient_id,
                 created_by=sessionID,
                 updated_by=sessionID
             )
             db.session.add(new_contact)
-            logger.info(f"Adding emergency contact: {contact_data['firstName']} {contact_data['lastName']} for patient {latest_patient.id}")
+            saved_count['contacts'] += 1
         
         # Save family backgrounds
         for family_data in familyBack:
@@ -425,12 +447,12 @@ def complete_patient_registration():
                     familyBackground=family_data['background'],
                     time=family_data['time'],
                     degreeRelationship=family_data['degree'],
-                    idPatient=latest_patient.id,
+                    idPatient=current_patient_id,
                     created_by=sessionID,
                     updated_by=sessionID
                 )
                 db.session.add(new_family_bg)
-                logger.info(f"Adding family background: {family_data['background']} for patient {latest_patient.id}")
+                saved_count['backgrounds'] += 1
         
         # Save pre-existing conditions
         for condition_data in preExistingConditions:
@@ -440,12 +462,12 @@ def complete_patient_registration():
                     time=condition_data['time'],
                     medicament=condition_data.get('medicament'),
                     treatment=condition_data.get('treatment'),
-                    idPatient=latest_patient.id,
+                    idPatient=current_patient_id,
                     created_by=sessionID,
                     updated_by=sessionID
                 )
                 db.session.add(new_condition)
-                logger.info(f"Adding pre-existing condition: {condition_data['diseaseName']} for patient {latest_patient.id}")
+                saved_count['conditions'] += 1
         
         # Commit all changes
         db.session.commit()
@@ -457,8 +479,24 @@ def complete_patient_registration():
         emergencyContacts.clear()
         current_patient_id = None
         
-        flash(f'Registro del paciente {latest_patient.firstName} {latest_patient.lastName1} completado exitosamente', 'success')
-        logger.info(f"Patient registration completed for: {latest_patient.identifierCode} (ID: {latest_patient.id})")
+        # Create summary message
+        summary_parts = []
+        if saved_count['allergies'] > 0:
+            summary_parts.append(f"{saved_count['allergies']} alergia(s)")
+        if saved_count['contacts'] > 0:
+            summary_parts.append(f"{saved_count['contacts']} contacto(s) de emergencia")
+        if saved_count['backgrounds'] > 0:
+            summary_parts.append(f"{saved_count['backgrounds']} antecedente(s) familiar(es)")
+        if saved_count['conditions'] > 0:
+            summary_parts.append(f"{saved_count['conditions']} condición(es) preexistente(s)")
+        
+        if summary_parts:
+            summary = " • ".join(summary_parts)
+            flash(f'Registro del paciente {patient.firstName} {patient.lastName1} completado exitosamente con: {summary}', 'success')
+        else:
+            flash(f'Registro del paciente {patient.firstName} {patient.lastName1} completado exitosamente (sin información adicional)', 'success')
+        
+        logger.info(f"Patient registration completed for: {patient.identifierCode} (ID: {patient.id}) with additional data")
         
         return redirect(url_for('clinic.home'))
         
@@ -467,190 +505,3 @@ def complete_patient_registration():
         logger.error(f"Error completing patient registration: {str(e)}")
         flash('Error al completar el registro del paciente', 'error')
         return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatientInfo'))
-
-@patients.route('/clear-temp-data', methods=['POST'])
-def clear_temp_data():
-    """Clear all temporary data"""
-    global allergies, familyBack, preExistingConditions, emergencyContacts, current_patient_id
-    allergies.clear()
-    familyBack.clear()
-    preExistingConditions.clear()
-    emergencyContacts.clear()
-    current_patient_id = None  # Reset current patient ID
-    flash('Datos temporales limpiados', 'info')
-    return redirect(url_for('clinic.home', view='addPatient', sec_view='addPatient'))
-
-@patients.route('/edit-patient/<int:patient_id>', methods=['GET', 'POST'])
-def edit_patient(patient_id):
-    """Edit existing patient"""
-    if 'cedula' not in session:
-        flash('Sesión no válida', 'error')
-        return redirect(url_for('clinic.index'))
-    
-    sessionID = session['cedula']
-    
-    try:
-        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
-        if not patient:
-            flash('Paciente no encontrado', 'error')
-            return redirect(url_for('clinic.home'))
-        
-        if request.method == 'POST':
-            # Update patient data
-            patient.firstName = request.form.get('firstName', patient.firstName)
-            patient.middleName = request.form.get('middleName', patient.middleName)
-            patient.lastName1 = request.form.get('lastName1', patient.lastName1)
-            patient.lastName2 = request.form.get('lastName2', patient.lastName2)
-            patient.nationality = request.form.get('nationality', patient.nationality)
-            patient.address = request.form.get('address', patient.address)
-            patient.phoneNumber = request.form.get('phoneNumber', patient.phoneNumber)
-            patient.gender = request.form.get('gender', patient.gender)
-            patient.sex = request.form.get('sex', patient.sex)
-            patient.civilStatus = request.form.get('civilStatus', patient.civilStatus)
-            patient.job = request.form.get('job', patient.job)
-            patient.bloodType = request.form.get('bloodType', patient.bloodType)
-            patient.email = request.form.get('email', patient.email)
-            patient.updated_by = sessionID
-            
-            db.session.commit()
-            flash('Paciente actualizado exitosamente', 'success')
-            logger.info(f"Patient updated: {patient.identifierCode}")
-            return redirect(url_for('patients.show_patients'))
-        
-        return render_template('edit_patient.html', patient=patient)
-        
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error editing patient: {str(e)}")
-        flash('Error al editar paciente', 'error')
-        return redirect(url_for('patients.show_patients'))
-
-@patients.route('/delete-patient/<int:patient_id>', methods=['POST'])
-def delete_patient(patient_id):
-    """Soft delete patient"""
-    if 'cedula' not in session:
-        flash('Sesión no válida', 'error')
-        return redirect(url_for('clinic.index'))
-    
-    sessionID = session['cedula']
-    
-    try:
-        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
-        if not patient:
-            flash('Paciente no encontrado', 'error')
-            return redirect(url_for('patients.show_patients'))
-        
-        # Soft delete
-        patient.is_deleted = True
-        patient.updated_by = sessionID
-        db.session.commit()
-        
-        flash('Paciente eliminado exitosamente', 'success')
-        logger.info(f"Patient soft deleted: {patient.identifierCode}")
-        
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error deleting patient: {str(e)}")
-        flash('Error al eliminar paciente', 'error')
-    
-    return redirect(url_for('patients.show_patients'))
-
-@patients.route('/add-familyBack', methods=['GET', 'POST'])
-def add_familyBack():
-    """Add family background with improved error handling"""
-    if 'cedula' not in session:
-        flash('Sesión no válida', 'error')
-        return redirect(url_for('clinic.index'))
-    
-    sessionID = session['cedula']
-    
-    if request.method == 'POST':
-        try:
-            background = request.form.get('familyBackground')
-            time = request.form.get('time')
-            degree_relationship = request.form.get('degreeRelationship')
-            patient_id = request.form.get('patient_id')
-            
-            if not background or not background.strip():
-                flash('Por favor ingrese un antecedente familiar válido', 'error')
-                return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
-                                     familyBack=familyBack, emergencyContacts=emergencyContacts, 
-                                     allergies=allergies, preExistingConditions=preExistingConditions)
-            
-            # Always store temporarily for now - will save to DB at final step
-            family_data = {
-                'background': background.strip(),
-                'time': time,
-                'degree': degree_relationship
-            }
-            if family_data not in familyBack:
-                familyBack.append(family_data)
-                flash('Antecedente familiar agregado temporalmente', 'info')
-            
-        except Exception as e:
-            logger.error(f"Error adding family background: {str(e)}")
-            flash('Error al agregar antecedente familiar', 'error')
-    
-    return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
-                         familyBack=familyBack, emergencyContacts=emergencyContacts, 
-                         allergies=allergies, preExistingConditions=preExistingConditions)
-
-@patients.route('/remove-familyBack', methods=['POST'])
-def remove_familyBack():
-    """Remove family background from temporary list"""
-    try:
-        index = int(request.form.get('index', -1))
-        if 0 <= index < len(familyBack):
-            removed_item = familyBack.pop(index)
-            flash('Antecedente familiar eliminado', 'success')
-        else:
-            flash('Antecedente familiar no encontrado', 'error')
-    except Exception as e:
-        logger.error(f"Error removing family background: {str(e)}")
-        flash('Error al eliminar antecedente familiar', 'error')
-    
-    return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
-                         familyBack=familyBack, emergencyContacts=emergencyContacts, 
-                         allergies=allergies, preExistingConditions=preExistingConditions)
-
-@patients.route('/add-conditions', methods=['GET', 'POST'])
-def add_conditions():
-    """Add pre-existing conditions with improved error handling"""
-    if 'cedula' not in session:
-        flash('Sesión no válida', 'error')
-        return redirect(url_for('clinic.index'))
-    
-    sessionID = session['cedula']
-    
-    if request.method == 'POST':
-        try:
-            disease_name = request.form.get('diseaseName')
-            time = request.form.get('time')
-            medicament = request.form.get('medicament')
-            treatment = request.form.get('treatment')
-            patient_id = request.form.get('patient_id')
-            
-            if not disease_name or not disease_name.strip():
-                flash('Por favor ingrese un nombre de enfermedad válido', 'error')
-                return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
-                                     preExistingConditions=preExistingConditions, emergencyContacts=emergencyContacts, 
-                                     allergies=allergies, familyBack=familyBack)
-            
-            # Always store temporarily for now - will save to DB at final step
-            condition_data = {
-                'diseaseName': disease_name.strip(),
-                'time': time,
-                'medicament': medicament,
-                'treatment': treatment
-            }
-            if condition_data not in preExistingConditions:
-                preExistingConditions.append(condition_data)
-                flash('Condición preexistente agregada temporalmente', 'info')
-            
-        except Exception as e:
-            logger.error(f"Error adding pre-existing condition: {str(e)}")
-            flash('Error al agregar condición preexistente', 'error')
-    
-    return render_template('home.html', view='addPatient', sec_view="addPatientInfo", 
-                         preExistingConditions=preExistingConditions, emergencyContacts=emergencyContacts, 
-                         allergies=allergies, familyBack=familyBack)

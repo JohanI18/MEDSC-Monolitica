@@ -5,13 +5,13 @@
       <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}" method="POST">
         <button class="tab-button {{ 'active' if sec_view == 'addPatient' else '' }}">
           <i class="fas fa-id-card me-1" ></i> Datos del Paciente
-          {% if patient_data_completed %}
+          {% if current_patient_id %}
             <i class="fas fa-check-circle ms-1 text-success"></i>
           {% endif %}
         </button>
       </form>
       
-      {% if patient_data_completed %}
+      {% if current_patient_id %}
         <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatientInfo') }}" method="POST">
           <button class="tab-button {{ 'active' if sec_view == 'addPatientInfo' else '' }}">
             <i class="fas fa-info-circle me-1"></i> Información Adicional
@@ -32,6 +32,13 @@
           {% if sec_view == "addPatient" %}
             {% include 'partials/_patientForm.html' %}
           {% elif sec_view == "addPatientInfo" %}
+            <!-- Show current patient info -->
+            {% if current_patient_id %}
+              <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Agregando información adicional para el paciente recién creado.</strong>
+              </div>
+            {% endif %}
             {% include 'partials/_emergencyContactForm.html' %}
             {% include 'partials/_allergiesForm.html' %}
             {% include 'partials/_familyBackgroundForm.html' %}
@@ -44,17 +51,49 @@
     <!-- Botones de navegación simplificados -->
     <div class="nav-buttons">
       {% if sec_view == "addPatientInfo" %}
-        <form action="{{ url_for('clinic.home', view='addPatient', sec_view='addPatient') }}" method="POST">
-          <button type="submit" class="nav-button back-button">
-            <i class="fas fa-arrow-left me-1"></i>Editar Datos Básicos
-          </button>
-        </form>
+        <!-- Show summary of temporary data -->
+        {% if current_patient_id and (allergies or emergencyContacts or familyBack or preExistingConditions) %}
+          <div class="alert alert-secondary mb-3">
+            <h6><i class="fas fa-info-circle me-2"></i>Datos temporales a guardar:</h6>
+            <ul class="mb-0">
+              {% if allergies %}
+                <li>{{ allergies|length }} alergia(s)</li>
+              {% endif %}
+              {% if emergencyContacts %}
+                <li>{{ emergencyContacts|length }} contacto(s) de emergencia</li>
+              {% endif %}
+              {% if familyBack %}
+                <li>{{ familyBack|length }} antecedente(s) familiar(es)</li>
+              {% endif %}
+              {% if preExistingConditions %}
+                <li>{{ preExistingConditions|length }} condición(es) preexistente(s)</li>
+              {% endif %}
+            </ul>
+          </div>
+        {% endif %}
         
         <!-- Final submit button -->
-        <form action="/complete-patient-registration" method="POST">
+        <form action="/complete-patient-registration" method="POST" onsubmit="return confirmFinalization()">
           <button type="submit" class="nav-button complete-button">
-            <i class="fas fa-check-circle me-1"></i>Finalizar y Guardar Paciente
+            <i class="fas fa-check-circle me-1"></i>Finalizar Registro del Paciente
           </button>
         </form>
       {% endif %}
     </div>
+
+<script>
+function confirmFinalization() {
+    const allergiesCount = {{ allergies|length if allergies else 0 }};
+    const contactsCount = {{ emergencyContacts|length if emergencyContacts else 0 }};
+    const familyCount = {{ familyBack|length if familyBack else 0 }};
+    const conditionsCount = {{ preExistingConditions|length if preExistingConditions else 0 }};
+    
+    const totalItems = allergiesCount + contactsCount + familyCount + conditionsCount;
+    
+    if (totalItems === 0) {
+        return confirm('¿Está seguro de finalizar el registro sin información adicional?');
+    } else {
+        return confirm(`¿Está seguro de finalizar el registro? Se guardarán ${totalItems} elemento(s) de información adicional.`);
+    }
+}
+</script>
