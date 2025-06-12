@@ -2,17 +2,25 @@
 
 <div class="patient-selection-container">
     <h3 class="form-section-title">
-        <i class="fas fa-user-md me-2"></i>Seleccionar Paciente para Nueva Atención
+        {% if view == 'addAttention' %}
+            <i class="fas fa-user-md me-2"></i>Seleccionar Paciente para Nueva Atención
+        {% elif view == 'attentionHistory' %}
+            <i class="fas fa-history me-2"></i>Seleccionar Paciente para Ver Historial
+        {% endif %}
     </h3>
     
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>
-        <strong>Paso 1 de 2:</strong> Seleccione el paciente para quien desea registrar una nueva atención médica.
+        {% if view == 'addAttention' %}
+            <strong>Paso 1 de 2:</strong> Seleccione el paciente para quien desea registrar una nueva atención médica.
+        {% elif view == 'attentionHistory' %}
+            <strong>Paso 1 de 2:</strong> Seleccione el paciente para ver su historial de atenciones médicas.
+        {% endif %}
     </div>
     
     {% include 'partials/_message.html' %}
     
-    <form action="/select-patient-for-attention" method="POST" class="patient-selection-form">
+    <form action="{% if view == 'addAttention' %}/select-patient-for-attention{% elif view == 'attentionHistory' %}/get-attention-for-patient{% else %}#{% endif %}" method="POST" class="patient-selection-form">
         <div class="row g-3">
             <div class="col-12">
                 <label for="selectedPatient" class="form-label">
@@ -60,9 +68,15 @@
         </div>
         
         <div class="form-actions mt-4">
-            <button type="submit" class="btn btn-primary btn-lg" id="continueBtn" disabled>
-                <i class="fas fa-user-check me-2"></i>Continuar con este Paciente
-            </button>
+            {% if view == 'addAttention' %}
+                <button type="submit" class="btn btn-primary btn-lg" id="continueBtn" disabled>
+                    <i class="fas fa-user-check me-2"></i>Continuar con este Paciente
+                </button>
+            {% elif view == 'attentionHistory' %}
+                <button type="submit" class="btn btn-primary btn-lg" id="continueBtn" disabled>
+                    <i class="fas fa-history me-2"></i>Ver Historial de Paciente
+                </button>
+            {% endif %}
         </div>
     </form>
     

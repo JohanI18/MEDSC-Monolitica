@@ -37,6 +37,13 @@
                     </form>
                 </li>
                 <li>
+                    <form action="{{ url_for('clinic.home', view='attentionHistory') }}" method="POST">
+                        <button class="nav-button">
+                            <i class="fas fa-stethoscope me-2"></i>HISTORIAL DE ATENCIONES
+                        </button>
+                    </form>
+                </li>
+                <li>
                     <form action="{{ url_for('chat.chat_view') }}" method="GET">
                         <button class="nav-button">
                             <i class="fas fa-comments me-2"></i>CHAT MÉDICO
@@ -82,6 +89,18 @@
             <h1 class="attention-title">Agregar Atención</h1>
 
             {% include 'partials/_addAttention.html' %}
+
+            <form action="{{ url_for('clinic.home', view='home') }}">
+                <button class="patient-back-link"> ← Volver </button>    
+            </form>
+
+            <!-- <button class="patient-back-link"> ← Volver </button> -->
+        </div>
+        {% elif view == 'attentionHistory' %}
+        <div class="attention-container">
+            <h1 class="attention-title">Historial de Atenciones</h1>
+
+            {% include 'partials/_attentionHistory.html' %}
 
             <form action="{{ url_for('clinic.home', view='home') }}">
                 <button class="patient-back-link"> ← Volver </button>    

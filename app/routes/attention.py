@@ -546,7 +546,6 @@ def add_evolution():
 def select_patient_for_attention():
     """Select patient for current attention"""
     global selected_patient_id
-    
     if 'cedula' not in session:
         flash('Sesión no válida', 'error')
         return redirect(url_for('clinic.index'))
@@ -572,6 +571,7 @@ def select_patient_for_attention():
         logger.error(f"Error selecting patient: {str(e)}")
         flash('Error al seleccionar paciente', 'error')
     
+    print('5')    
     return redirect(url_for('clinic.home', view='addAttention'))
 
 @attention.route('/change-selected-patient', methods=['POST'])
@@ -840,3 +840,58 @@ def get_doctors():
     except Exception as e:
         logger.error(f"Error getting doctors: {str(e)}")
         return jsonify({'error': 'Error al obtener doctores'}), 500
+
+
+@attention.route('/get-attention-for-patient', methods=['POST'])
+def get_attention_for_patient():
+    """Select patient for current attention"""
+    global selected_patient_id
+    
+    if 'cedula' not in session:
+        flash('Sesión no válida', 'error')
+        return redirect(url_for('clinic.index'))
+    
+    try:
+        patient_id = request.form.get('selectedPatient')
+        
+        if not patient_id:
+            flash('Debe seleccionar un paciente', 'error')
+            return redirect(url_for('clinic.home', view='attentionHsitory'))
+        
+        # Validate that patient exists
+        patient = Patient.query.filter_by(id=patient_id, is_deleted=False).first()
+        if not patient:
+            flash('Paciente no encontrado', 'error')
+            return redirect(url_for('clinic.home', view='attentionHsitory'))
+        
+        selected_patient_id = int(patient_id)
+        flash(f'Paciente {patient.firstName} {patient.lastName1} seleccionado. Puede proceder con los signos vitales.', 'success')
+        logger.info(f"Patient {patient_id} selected for attention")
+        
+    except Exception as e:
+        logger.error(f"Error selecting patient: {str(e)}")
+        flash('Error al seleccionar paciente', 'error')
+    return redirect(url_for('clinic.home', view='attentionHistory'))
+
+@attention.route('/view/<int:attention_id>', methods=['GET'])
+def view(attention_id):
+    """Show details for a specific attention record"""
+    attention_record = Attention.query.filter_by(id=attention_id).first()
+    if not attention_record:
+        flash('Atención no encontrada', 'error')
+        return redirect(url_for('clinic.home', view='attentionHistory'))
+
+    patient = Patient.query.filter_by(id=attention_record.idPatient, is_deleted=False).first()
+    doctor = Doctor.query.filter_by(id=attention_record.idDoctor, is_deleted=False).first()
+
+    # You can add more related queries here if needed (diagnostics, treatments, etc.)
+    print('here!!!!')
+
+    return render_template(
+        'attention_detail.html',
+        attention=attention_record,
+        patient=patient,
+        doctor=doctor
+    )
+
+

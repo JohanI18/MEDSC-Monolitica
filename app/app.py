@@ -32,9 +32,9 @@ def create_app():
     return app
 
 # Agregar esta función para ejecutar la aplicación con SocketIO
-def run_app():
-    from app import socketio, app
-    socketio.run(app, debug=True, host='0.0.0.0')
+# def run_app():
+#     from app import socketio, app
+#     socketio.run(app, debug=True, host='0.0.0.0')
 
-if __name__ == '__main__':
-    run_app()
+# if __name__ == '__main__':
+#     run_app()

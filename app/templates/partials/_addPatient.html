@@ -99,10 +99,15 @@
 
 <script>
 function confirmFinalization() {
-    const allergiesCount = {{ allergies|length if allergies else 0 }};
-    const contactsCount = {{ emergencyContacts|length if emergencyContacts else 0 }};
-    const familyCount = {{ familyBack|length if familyBack else 0 }};
-    const conditionsCount = {{ preExistingConditions|length if preExistingConditions else 0 }};
+    // const allergiesCount = {{ allergies|length if allergies else 0 }};
+    // const contactsCount = {{ emergencyContacts|length if emergencyContacts else 0 }};
+    // const familyCount = {{ familyBack|length if familyBack else 0 }};
+    // const conditionsCount = {{ preExistingConditions|length if preExistingConditions else 0 }};
+
+    const allergiesCount = Number("{{ allergies|length if allergies else 0 }}");
+    const contactsCount = Number("{{ emergencyContacts|length if emergencyContacts else 0 }}");
+    const familyCount = Number("{{ familyBack|length if familyBack else 0 }}");
+    const conditionsCount = Number("{{ preExistingConditions|length if preExistingConditions else 0 }}");
     
     const totalItems = allergiesCount + contactsCount + familyCount + conditionsCount;
     

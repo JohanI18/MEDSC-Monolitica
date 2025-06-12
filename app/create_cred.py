@@ -45,6 +45,41 @@ with app.app_context():
         db.session.commit()
 
         print("✅ Doctor y credenciales creados correctamente.")
+
+
+
+        # Crear doctor
+        doctor2 = Doctor(
+            identifierCode="DOC003",
+            firstName="Carlos",
+            middleName="Eduardo",
+            lastName1="Pérez",
+            lastName2="García",
+            phoneNumber="0999999998",
+            address="Calle Central #12-50",
+            gender="Masculino",
+            sex="Masculino",
+            speciality="Pediatría",
+            email="carlos.perez@example.com",
+            created_by="admin",
+            updated_by="admin"
+        )
+        db.session.add(doctor2)
+        db.session.commit()
+
+        # Crear credenciales
+        credentials2 = Credentials(
+            identifierCode="DOC003",
+            password=create_hashed_password("clave_segura"),  # Asegúrate de hashear en producción
+            idUser=doctor2.id,
+            userType="doctor",
+            created_by="admin",
+            updated_by="admin"
+        )
+        db.session.add(credentials2)
+        db.session.commit()
+
+        print("✅ Doctor y credenciales creados correctamente.")
     
     except Exception as e:
         db.session.rollback()

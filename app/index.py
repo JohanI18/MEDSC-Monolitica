@@ -7,6 +7,9 @@ import logging
 
 app = create_app()
 
+with app.app_context():
+    db.create_all()  # Ensure all models are created in the database
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -88,4 +91,4 @@ def handle_message(data):
         emit('message_error', {'error': 'Error al enviar mensaje'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

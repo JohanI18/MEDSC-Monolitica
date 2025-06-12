@@ -37,6 +37,13 @@
                     </form>
                 </li>
                 <li>
+                    <form action="{{ url_for('clinic.home', view='attentionHistory') }}" method="POST">
+                        <button class="nav-button">
+                            <i class="fas fa-stethoscope me-2"></i>HISTORIAL DE ATENCIONES
+                        </button>
+                    </form>
+                </li>
+                <li>
                     <form action="{{ url_for('chat.chat_view') }}" method="GET">
                         <button class="nav-button active">
                             <i class="fas fa-comments me-2"></i>CHAT MÉDICO
@@ -109,7 +116,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 <script>
     // Store current doctor info
-    const currentDoctorId = {{ doctor_info.id if doctor_info else 'null' }};
+    const currentDoctorId = {{ doctor_info.id if doctor_info else null }};
     let selectedDoctorId = null;
     let socket = null;
     
